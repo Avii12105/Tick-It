@@ -70,6 +70,32 @@ class CapacityConstraintTests(TestCase):
         )
         self.assertEqual(Event.objects.get(pk=event.pk).allocated_capacity, 100)
 
+    def test_venue_cannot_shrink_below_existing_event_allocation(self):
+        Event.objects.create(
+            venue=self.venue,
+            organizer=self.org,
+            name="Full House",
+            date=datetime.now(timezone.utc),
+            allocated_capacity=100,
+        )
+        with self.assertRaises(ValidationError):
+            self.venue.max_capacity = 50
+            self.venue.save()
+
+    def test_venue_shrink_allowed_when_events_fit(self):
+        Event.objects.create(
+            venue=self.venue,
+            organizer=self.org,
+            name="Half Full",
+            date=datetime.now(timezone.utc),
+            allocated_capacity=40,
+        )
+        self.venue.max_capacity = 50
+        self.venue.save()
+        self.assertEqual(
+            Venue.objects.get(pk=self.venue.pk).max_capacity, 50
+        )
+
 
 class OrganizerFlowTests(TestCase):
     def setUp(self):
@@ -124,6 +150,23 @@ class OrganizerFlowTests(TestCase):
             reverse("events:venue_detail", args=[other_venue.pk])
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_venue_shrink_below_event_form_rejected(self):
+        Event.objects.create(
+            venue=self.venue,
+            organizer=self.org,
+            name="Full House",
+            date=datetime.now(timezone.utc),
+            allocated_capacity=100,
+        )
+        self.client.login(username="org", password="pass12345")
+        response = self.client.post(
+            reverse("events:venue_update", args=[self.venue.pk]),
+            {"name": "Stadium", "address": "", "max_capacity": 50},
+        )
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertIn("max_capacity", form.errors)
 
 
 class PublicBrowseTests(TestCase):

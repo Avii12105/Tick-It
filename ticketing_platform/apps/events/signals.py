@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-from .models import Event
+from .models import Event, Venue, validate_venue_capacity
 
 
 @receiver(pre_save, sender=Event)
@@ -17,3 +17,8 @@ def enforce_capacity_on_save(sender, instance, **kwargs):
                     )
                 }
             )
+
+
+@receiver(pre_save, sender=Venue)
+def enforce_capacity_against_existing_events(sender, instance, **kwargs):
+    validate_venue_capacity(instance)

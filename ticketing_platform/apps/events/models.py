@@ -20,6 +20,25 @@ class Venue(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        super().clean()
+        validate_venue_capacity(self)
+
+
+def validate_venue_capacity(venue):
+    if (
+        venue.pk
+        and venue.events.filter(allocated_capacity__gt=venue.max_capacity).exists()
+    ):
+        raise ValidationError(
+            {
+                "max_capacity": (
+                    "Cannot reduce capacity below an existing event's ticket "
+                    "allocation."
+                )
+            }
+        )
+
 
 class Event(models.Model):
     class Status(models.TextChoices):

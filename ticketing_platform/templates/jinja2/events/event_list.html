@@ -1,0 +1,22 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Upcoming Events · TickIt{% endblock %}
+
+{% block content %}
+    <h1>Upcoming Events</h1>
+    {% if events %}
+        {% for event in events %}
+            <div class="card">
+                <h2><a href="{{ url('events:public_event_detail', event.pk) }}">{{ event.name }}</a></h2>
+                <p class="muted">{{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}</p>
+                <p>{{ event.description }}</p>
+                <p>
+                    <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+                    Capacity: {{ event.allocated_capacity }}
+                </p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="muted">No published events yet. Check back soon!</p>
+    {% endif %}
+{% endblock %}

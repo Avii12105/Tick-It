@@ -1,0 +1,35 @@
+{% extends "base/layout.html" %}
+
+{% block title %}My Venues · TickIt{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <h1>My Venues</h1>
+        <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+    </div>
+    {% if venues %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Max Capacity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venue in venues %}
+                    <tr>
+                        <td><a href="{{ url('events:venue_detail', venue.pk) }}">{{ venue.name }}</a></td>
+                        <td>{{ venue.max_capacity }}</td>
+                        <td>
+                            <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary">Edit</a>
+                            <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">You have no venues yet. Create your first venue.</p>
+    {% endif %}
+{% endblock %}

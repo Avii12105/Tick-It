@@ -1,0 +1,19 @@
+<nav class="navbar">
+    <a class="navbar-brand" href="{{ url('events:home') }}">TickIt</a>
+    <div class="nav-links">
+        {% if user.is_authenticated %}
+            {% if user.profile.is_organizer() %}
+                <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+                <a href="{{ url('events:venue_list') }}">My Venues</a>
+            {% endif %}
+            <span class="nav-user">{{ user.username }} ({{ user.profile.get_role_display() }})</span>
+            <form method="post" action="{{ url('accounts:logout') }}" class="inline">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-link">Logout</button>
+            </form>
+        {% else %}
+            <a href="{{ url('accounts:login') }}">Login</a>
+            <a href="{{ url('accounts:signup') }}">Sign up</a>
+        {% endif %}
+    </div>
+</nav>

@@ -1,0 +1,39 @@
+{% extends "base/layout.html" %}
+
+{% block title %}{{ venue.name }} · TickIt{% endblock %}
+
+{% block content %}
+    <h1>{{ venue.name }}</h1>
+    <p class="muted">{{ venue.address }}</p>
+    <div class="card">
+        <p><strong>Max Capacity:</strong> {{ venue.max_capacity }}</p>
+        <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary">Edit</a>
+        <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger">Delete</a>
+    </div>
+
+    <h2>Events at this venue</h2>
+    {% if events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Allocated</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                        <td>{{ event.allocated_capacity }} / {{ venue.max_capacity }}</td>
+                        <td><span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">No events scheduled at this venue yet.</p>
+    {% endif %}
+{% endblock %}

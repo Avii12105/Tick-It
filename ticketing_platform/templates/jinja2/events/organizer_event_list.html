@@ -1,0 +1,41 @@
+{% extends "base/layout.html" %}
+
+{% block title %}My Events · TickIt{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <h1>My Events</h1>
+        <a href="{{ url('events:event_create') }}" class="btn btn-primary">+ New Event</a>
+    </div>
+    {% if events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Venue</th>
+                    <th>Date</th>
+                    <th>Allocated / Venue Cap</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.venue.name }}</td>
+                        <td>{{ event.date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                        <td>{{ event.allocated_capacity }} / {{ event.venue.max_capacity }}</td>
+                        <td><span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span></td>
+                        <td>
+                            <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit</a>
+                            <a href="{{ url('events:event_delete', event.pk) }}" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">You have no events yet. Create your first event.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base/layout.html" %}
+
+{% block title %}{{ event.name }} · TickIt{% endblock %}
+
+{% block content %}
+    <h1>{{ event.name }}</h1>
+    <p class="muted">
+        {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
+        ({{ event.venue.address }})
+    </p>
+    <div class="card">
+        <p>{{ event.description }}</p>
+        <p>
+            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+            Capacity: {{ event.allocated_capacity }}
+        </p>
+    </div>
+    <p><a href="{{ url('events:home') }}" class="btn btn-secondary">Back to events</a></p>
+{% endblock %}

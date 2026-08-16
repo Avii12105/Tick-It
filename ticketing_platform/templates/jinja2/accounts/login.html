@@ -1,0 +1,16 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Login · TickIt{% endblock %}
+
+{% block content %}
+    <h1>Login</h1>
+    {% if form.non_field_errors() %}
+        <div class="alert alert-error">{{ form.non_field_errors() }}</div>
+    {% endif %}
+    <form method="post" class="form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ next or '' }}">
+        {{ form.as_p() }}
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+{% endblock %}

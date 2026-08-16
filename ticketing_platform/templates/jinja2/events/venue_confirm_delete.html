@@ -1,0 +1,16 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Delete {{ venue.name }} · TickIt{% endblock %}
+
+{% block content %}
+    <h1>Delete Venue</h1>
+    <p>
+        Are you sure you want to delete <strong>{{ venue.name }}</strong>?
+        This cannot be undone.
+    </p>
+    <form method="post" class="form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

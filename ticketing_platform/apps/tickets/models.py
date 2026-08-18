@@ -96,6 +96,17 @@ def validate_ticket_type_capacity(ticket_type):
                 )
             }
         )
+    held = ticket_type.reserved_count() if ticket_type.pk else 0
+    if ticket_type.quantity_total < ticket_type.quantity_sold + held:
+        raise ValidationError(
+            {
+                "quantity_total": (
+                    "Cannot be less than the number already sold "
+                    f"({ticket_type.quantity_sold}) plus tickets currently held "
+                    f"in carts ({held})."
+                )
+            }
+        )
     other = ticket_type.event.ticket_types.all()
     if ticket_type.pk:
         other = other.exclude(pk=ticket_type.pk)

@@ -7,6 +7,8 @@ from django.utils import timezone
 
 from .models import Reservation, TicketType
 
+from apps.events.models import Event
+
 RESERVATION_LOCK_MINUTES = 10
 
 
@@ -25,6 +27,11 @@ def reserve_tickets(ticket_type_id, user, quantity):
             quantity_sold=F("quantity_sold")
         )
         ticket_type = TicketType.objects.select_for_update().get(pk=ticket_type_id)
+
+        if ticket_type.event.status != Event.Status.PUBLISHED:
+            raise ValidationError(
+                "Tickets are not available for this event yet."
+            )
 
         available = ticket_type.available_count()
         if quantity > available:

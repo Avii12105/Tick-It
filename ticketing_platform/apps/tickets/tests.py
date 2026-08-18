@@ -125,6 +125,28 @@ class ReservationLogicTests(TestCase):
         reservation.delete()
         self.assertEqual(self.tier.available_count(), 10)
 
+    def test_quantity_total_cannot_be_less_than_held_in_carts(self):
+        reserve_tickets(self.tier.pk, self.user, 8)
+        self.tier.quantity_total = 5
+        with self.assertRaises(ValidationError):
+            self.tier.full_clean()
+        with self.assertRaises(ValidationError):
+            self.tier.save()
+
+    def test_quantity_total_can_match_sold_plus_held(self):
+        reserve_tickets(self.tier.pk, self.user, 8)
+        self.tier.quantity_total = 8
+        self.tier.save()
+        self.assertEqual(self.tier.available_count(), 0)
+
+    def test_cannot_reserve_for_non_published_event(self):
+        draft_event = make_event(allocated=100, status="draft")
+        draft_tier = TicketType.objects.create(
+            event=draft_event, name="GA", price=50, quantity_total=10
+        )
+        with self.assertRaises(ValidationError):
+            reserve_tickets(draft_tier.pk, self.user, 1)
+
 
 class CartFlowTests(TestCase):
     def setUp(self):

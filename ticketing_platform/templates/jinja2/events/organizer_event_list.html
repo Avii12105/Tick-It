@@ -28,6 +28,7 @@
                         <td>{{ event.allocated_capacity }} / {{ event.venue.max_capacity }}</td>
                         <td><span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span></td>
                         <td>
+                            <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-secondary">Manage</a>
                             <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit</a>
                             <a href="{{ url('events:event_delete', event.pk) }}" class="btn btn-danger">Delete</a>
                         </td>

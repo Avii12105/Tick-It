@@ -2,6 +2,7 @@
     <a class="navbar-brand" href="{{ url('events:home') }}">TickIt</a>
     <div class="nav-links">
         {% if user.is_authenticated %}
+            <a href="{{ url('tickets:cart') }}">My Cart</a>
             {% if user.profile.is_organizer() %}
                 <a href="{{ url('events:organizer_event_list') }}">My Events</a>
                 <a href="{{ url('events:venue_list') }}">My Venues</a>

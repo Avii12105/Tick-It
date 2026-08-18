@@ -39,6 +39,11 @@ urlpatterns = [
         name="organizer_event_list",
     ),
     path(
+        "organizer/events/<int:pk>/",
+        views.organizer_event_detail,
+        name="organizer_event_detail",
+    ),
+    path(
         "organizer/events/new/",
         views.event_create,
         name="event_create",

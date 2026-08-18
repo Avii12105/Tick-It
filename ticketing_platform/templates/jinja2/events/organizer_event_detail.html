@@ -1,0 +1,58 @@
+{% extends "base/layout.html" %}
+
+{% block title %}{{ event.name }} · TickIt{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <h1>{{ event.name }}</h1>
+        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">Back to events</a>
+    </div>
+    <p class="muted">
+        {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
+    </p>
+    <div class="card">
+        <p>
+            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+            Allocated capacity: {{ used_capacity }} / {{ event.allocated_capacity }}
+            (venue max {{ event.venue.max_capacity }})
+        </p>
+        <p>{{ event.description }}</p>
+        <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit event</a>
+    </div>
+
+    <div class="row">
+        <h2>Ticket tiers</h2>
+        <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary">+ Add tier</a>
+    </div>
+    {% if ticket_types %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Allocated</th>
+                    <th>Sold</th>
+                    <th>Available</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tt in ticket_types %}
+                    <tr>
+                        <td>{{ tt.name }}</td>
+                        <td>₹{{ tt.price }}</td>
+                        <td>{{ tt.quantity_total }}</td>
+                        <td>{{ tt.quantity_sold }}</td>
+                        <td>{{ tt.available_count() }}</td>
+                        <td>
+                            <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-secondary">Edit</a>
+                            <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">No ticket tiers yet. Add one to start selling.</p>
+    {% endif %}
+{% endblock %}

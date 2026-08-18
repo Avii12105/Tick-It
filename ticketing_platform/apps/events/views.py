@@ -1,26 +1,11 @@
-from functools import wraps
-from urllib.parse import quote
-
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+
+from apps.accounts.decorators import organizer_required
+from apps.tickets.models import TicketType
 
 from .forms import EventForm, VenueForm
 from .models import Event, Venue
-
-
-def organizer_required(view_func):
-    @wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            next_url = quote(request.get_full_path())
-            return redirect(f"{reverse('accounts:login')}?next={next_url}")
-        if not request.user.profile.is_organizer():
-            messages.error(request, "You need an Organizer account to do that.")
-            return redirect("events:home")
-        return view_func(request, *args, **kwargs)
-
-    return wrapper
 
 
 # --- Public views -----------------------------------------------------------
@@ -32,7 +17,12 @@ def home(request):
 
 def event_detail(request, pk):
     event = get_object_or_404(Event, pk=pk, status=Event.Status.PUBLISHED)
-    return render(request, "events/event_detail.html", {"event": event})
+    ticket_types = event.ticket_types.all()
+    return render(
+        request,
+        "events/event_detail.html",
+        {"event": event, "ticket_types": ticket_types},
+    )
 
 
 # --- Organizer: Venues ------------------------------------------------------
@@ -104,6 +94,22 @@ def venue_delete(request, pk):
 def organizer_event_list(request):
     events = Event.objects.filter(organizer=request.user).select_related("venue")
     return render(request, "events/organizer_event_list.html", {"events": events})
+
+
+@organizer_required
+def organizer_event_detail(request, pk):
+    event = get_object_or_404(Event, pk=pk, organizer=request.user)
+    ticket_types = event.ticket_types.all()
+    used_capacity = TicketType.allocated_total(event)
+    return render(
+        request,
+        "events/organizer_event_detail.html",
+        {
+            "event": event,
+            "ticket_types": ticket_types,
+            "used_capacity": used_capacity,
+        },
+    )
 
 
 @organizer_required

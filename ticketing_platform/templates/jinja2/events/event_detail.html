@@ -15,5 +15,45 @@
             Capacity: {{ event.allocated_capacity }}
         </p>
     </div>
+
+    <h2>Tickets</h2>
+    {% if ticket_types %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Tier</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tt in ticket_types %}
+                    {% set available = tt.available_count() %}
+                    <tr>
+                        <td>{{ tt.name }}</td>
+                        <td>₹{{ tt.price }}</td>
+                        <td>{{ available }}</td>
+                        <td>
+                            {% if available > 0 %}
+                                <form method="post" action="{{ url('tickets:add_to_cart') }}" class="inline">
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                    <input type="hidden" name="ticket_type" value="{{ tt.pk }}">
+                                    <input type="number" name="quantity" value="1" min="1" max="{{ available }}" style="width: 4rem;">
+                                    <button type="submit" class="btn btn-primary">Add to cart</button>
+                                </form>
+                            {% else %}
+                                <span class="muted">Sold out</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="muted">Tickets are held for 10 minutes when added to your cart.</p>
+    {% else %}
+        <p class="muted">Tickets are not available yet.</p>
+    {% endif %}
+
     <p><a href="{{ url('events:home') }}" class="btn btn-secondary">Back to events</a></p>
 {% endblock %}

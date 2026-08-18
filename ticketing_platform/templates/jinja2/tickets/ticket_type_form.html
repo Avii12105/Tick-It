@@ -1,0 +1,20 @@
+{% extends "base/layout.html" %}
+
+{% block title %}{{ title }} · TickIt{% endblock %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    {% if form.non_field_errors() %}
+        <div class="alert alert-error">{{ form.non_field_errors() }}</div>
+    {% endif %}
+    <p class="muted">
+        Event capacity: {{ event.allocated_capacity }} ·
+        Allocated across tiers so far: {{ used_capacity }}
+    </p>
+    <form method="post" class="form">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {{ form.as_p() }}
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}

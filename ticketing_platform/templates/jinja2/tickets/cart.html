@@ -1,0 +1,41 @@
+{% extends "base/layout.html" %}
+
+{% block title %}My Cart · TickIt{% endblock %}
+
+{% block content %}
+    <h1>My Cart</h1>
+    {% if reservations %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Tier</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Held until</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reservations %}
+                    <tr>
+                        <td><a href="{{ url('events:public_event_detail', r.ticket_type.event_id) }}">{{ r.ticket_type.event.name }}</a></td>
+                        <td>{{ r.ticket_type.name }}</td>
+                        <td>{{ r.quantity }}</td>
+                        <td>₹{{ (r.ticket_type.price * r.quantity) }}</td>
+                        <td>{{ r.expires_at.strftime('%b %d, %I:%M %p') }}</td>
+                        <td>
+                            <form method="post" action="{{ url('tickets:remove_from_cart', r.pk) }}" class="inline">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p class="muted">Checkout arrives in V3.</p>
+    {% else %}
+        <p class="muted">Your cart is empty. Add tickets from an event page.</p>
+    {% endif %}
+{% endblock %}

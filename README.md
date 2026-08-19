@@ -164,7 +164,6 @@ python manage.py test
 - **Jinja2** — template engine for all app templates
 - **qrcode + Pillow** — QR code PNG generation
 - **SQLite** — lightweight single-file database (file-based test DB enables real concurrency tests)
-- **Git tags** — every milestone ships as `v{N}.0.0`
 
 ---
 

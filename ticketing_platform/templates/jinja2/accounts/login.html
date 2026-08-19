@@ -3,14 +3,21 @@
 {% block title %}Login · TickIt{% endblock %}
 
 {% block content %}
-    <h1>Login</h1>
-    {% if form.non_field_errors() %}
-        <div class="alert alert-error">{{ form.non_field_errors() }}</div>
-    {% endif %}
-    <form method="post" class="form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <input type="hidden" name="next" value="{{ next or '' }}">
-        {{ form.as_p() }}
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <span class="auth-brand">🎟️ TickIt</span>
+            <p class="auth-sub">Sign in to your account</p>
+            {% if form.non_field_errors() %}
+                <div class="alert alert-error">{{ form.non_field_errors() }}</div>
+            {% endif %}
+            <form method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                <input type="hidden" name="next" value="{{ next or '' }}">
+                {{ form.as_p() }}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

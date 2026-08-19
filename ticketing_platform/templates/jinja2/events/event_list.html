@@ -4,19 +4,37 @@
 
 {% block content %}
     <h1>Upcoming Events</h1>
+    <p class="page-subtitle">Browse published events and grab your tickets.</p>
     {% if events %}
         {% for event in events %}
-            <div class="card">
-                <h2><a href="{{ url('events:public_event_detail', event.pk) }}">{{ event.name }}</a></h2>
-                <p class="muted">{{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}</p>
-                <p>{{ event.description }}</p>
-                <p>
-                    <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
-                    Capacity: {{ event.allocated_capacity }}
-                </p>
+            {% set pct = (event.allocated_capacity * 100 / event.venue.max_capacity) | int %}
+            <div class="event-card">
+                <div class="event-thumb">{{ event.name[0] | upper }}</div>
+                <div class="event-card-body">
+                    <div class="event-meta">
+                        <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+                        <span>ID: EVT-{{ event.pk }}</span>
+                    </div>
+                    <h3><a href="{{ url('events:public_event_detail', event.pk) }}">{{ event.name }}</a></h3>
+                    <div class="event-meta">
+                        <span>{{ event.date.strftime('%b %d, %Y %I:%M %p') }}</span>
+                        <span>·</span>
+                        <span>{{ event.venue.name }}</span>
+                    </div>
+                    <p class="muted">{{ event.description }}</p>
+                    <div class="progress">
+                        <div class="progress-fill" style="width: {{ pct }}%;"></div>
+                    </div>
+                    <div class="event-meta">{{ event.allocated_capacity }} seats</div>
+                    <div class="event-card-actions">
+                        <a href="{{ url('events:public_event_detail', event.pk) }}" class="btn btn-primary btn-sm">View Tickets</a>
+                    </div>
+                </div>
             </div>
         {% endfor %}
     {% else %}
-        <p class="muted">No published events yet. Check back soon!</p>
+        <div class="card">
+            <p class="muted">No published events yet. Check back soon!</p>
+        </div>
     {% endif %}
 {% endblock %}

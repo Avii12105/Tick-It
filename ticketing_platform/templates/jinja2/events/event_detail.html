@@ -3,57 +3,73 @@
 {% block title %}{{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <h1>{{ event.name }}</h1>
-    <p class="muted">
-        {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
-        ({{ event.venue.address }})
-    </p>
+    <div class="header-row">
+        <div>
+            <h1>{{ event.name }}</h1>
+            <p class="page-subtitle">
+                {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
+                ({{ event.venue.address }})
+            </p>
+        </div>
+        <div>
+            <a href="{{ url('events:home') }}" class="btn btn-outline">Back to events</a>
+        </div>
+    </div>
+
     <div class="card">
         <p>{{ event.description }}</p>
-        <p>
+        <div class="event-meta" style="margin-top: 12px;">
             <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
-            Capacity: {{ event.allocated_capacity }}
-        </p>
+            <span>Capacity: {{ event.allocated_capacity }}</span>
+        </div>
     </div>
 
     <h2>Tickets</h2>
     {% if ticket_types %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Tier</th>
-                    <th>Price</th>
-                    <th>Available</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tt in ticket_types %}
-                    {% set available = tt.available_count() %}
+        <div class="table-card">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ tt.name }}</td>
-                        <td>₹{{ tt.price }}</td>
-                        <td>{{ available }}</td>
-                        <td>
-                            {% if available > 0 %}
-                                <form method="post" action="{{ url('tickets:add_to_cart') }}" class="inline">
-                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                                    <input type="hidden" name="ticket_type" value="{{ tt.pk }}">
-                                    <input type="number" name="quantity" value="1" min="1" max="{{ available }}" style="width: 4rem;">
-                                    <button type="submit" class="btn btn-primary">Add to cart</button>
-                                </form>
-                            {% else %}
-                                <span class="muted">Sold out</span>
-                            {% endif %}
-                        </td>
+                        <th>Tier</th>
+                        <th>Price</th>
+                        <th>Available</th>
+                        <th></th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for tt in ticket_types %}
+                        {% set available = tt.available_count() %}
+                        <tr>
+                            <td><strong>{{ tt.name }}</strong></td>
+                            <td>₹{{ tt.price }}</td>
+                            <td>
+                                {% if available > 0 %}
+                                    <span class="badge badge-published">{{ available }} left</span>
+                                {% else %}
+                                    <span class="badge badge-soldout">Sold out</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if available > 0 %}
+                                    <form method="post" action="{{ url('tickets:add_to_cart') }}" class="inline">
+                                        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                        <input type="hidden" name="ticket_type" value="{{ tt.pk }}">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ available }}" style="width: 4rem; height: 38px; padding: 0 8px; border: 1px solid var(--border-strong); border-radius: 6px;">
+                                        <button type="submit" class="btn btn-primary btn-sm">Add to cart</button>
+                                    </form>
+                                {% else %}
+                                    <span class="muted">Sold out</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         <p class="muted">Tickets are held for 10 minutes when added to your cart.</p>
     {% else %}
-        <p class="muted">Tickets are not available yet.</p>
+        <div class="card">
+            <p class="muted">Tickets are not available yet.</p>
+        </div>
     {% endif %}
-
-    <p><a href="{{ url('events:home') }}" class="btn btn-secondary">Back to events</a></p>
 {% endblock %}

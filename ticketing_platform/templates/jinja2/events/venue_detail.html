@@ -3,37 +3,48 @@
 {% block title %}{{ venue.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <h1>{{ venue.name }}</h1>
-    <p class="muted">{{ venue.address }}</p>
+    <div class="header-row">
+        <div>
+            <h1>{{ venue.name }}</h1>
+            <p class="page-subtitle">{{ venue.address }}</p>
+        </div>
+        <div>
+            <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-outline">Edit</a>
+            <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger">Delete</a>
+        </div>
+    </div>
+
     <div class="card">
         <p><strong>Max Capacity:</strong> {{ venue.max_capacity }}</p>
-        <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary">Edit</a>
-        <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger">Delete</a>
     </div>
 
     <h2>Events at this venue</h2>
     {% if events %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Date</th>
-                    <th>Allocated</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for event in events %}
+        <div class="table-card">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ event.name }}</td>
-                        <td>{{ event.date.strftime('%b %d, %Y %I:%M %p') }}</td>
-                        <td>{{ event.allocated_capacity }} / {{ venue.max_capacity }}</td>
-                        <td><span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span></td>
+                        <th>Name</th>
+                        <th>Date</th>
+                        <th>Allocated</th>
+                        <th>Status</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td><strong>{{ event.name }}</strong></td>
+                            <td>{{ event.date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                            <td>{{ event.allocated_capacity }} / {{ venue.max_capacity }}</td>
+                            <td><span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p class="muted">No events scheduled at this venue yet.</p>
+        <div class="card">
+            <p class="muted">No events scheduled at this venue yet.</p>
+        </div>
     {% endif %}
 {% endblock %}

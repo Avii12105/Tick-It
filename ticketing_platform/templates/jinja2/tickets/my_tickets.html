@@ -4,32 +4,36 @@
 
 {% block content %}
     <h1>My Tickets</h1>
+    <p class="page-subtitle">All tickets you've purchased, ready to scan.</p>
     {% if tickets %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Event</th>
-                    <th>Tier</th>
-                    <th>Code</th>
-                    <th>Status</th>
-                    <th>Purchased</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in tickets %}
-                    <tr>
-                        <td>{{ t.event.name }}</td>
-                        <td>{{ t.ticket_type.name }}</td>
-                        <td><code>{{ t.unique_code[:8] }}...</code></td>
-                        <td><span class="badge badge-{{ t.status }}">{{ t.get_status_display() }}</span></td>
-                        <td>{{ t.purchased_at.strftime('%b %d, %Y') }}</td>
-                        <td><a href="{{ url('tickets:ticket_detail', t.pk) }}" class="btn btn-secondary">View</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        {% for t in tickets %}
+            <div class="event-card">
+                <div class="event-thumb">{{ t.event.name[0] | upper }}</div>
+                <div class="event-card-body">
+                    <div class="event-meta">
+                        <span class="badge badge-{{ t.status }}">{{ t.get_status_display() }}</span>
+                        <span>Purchased {{ t.purchased_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <h3><a href="{{ url('tickets:ticket_detail', t.pk) }}">{{ t.event.name }}</a></h3>
+                    <div class="event-meta">
+                        <span>{{ t.ticket_type.name }}</span>
+                        <span>·</span>
+                        <span>{{ t.event.date.strftime('%b %d, %Y %I:%M %p') }}</span>
+                        <span>·</span>
+                        <span>{{ t.event.venue.name }}</span>
+                    </div>
+                    <div class="event-meta">
+                        <code>{{ t.unique_code[:8] }}...</code>
+                    </div>
+                    <div class="event-card-actions">
+                        <a href="{{ url('tickets:ticket_detail', t.pk) }}" class="btn btn-primary btn-sm">View Ticket</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     {% else %}
-        <p class="muted">You haven't purchased any tickets yet.</p>
+        <div class="card">
+            <p class="muted">You haven't purchased any tickets yet.</p>
+        </div>
     {% endif %}
 {% endblock %}

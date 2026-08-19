@@ -3,10 +3,17 @@
 {% block title %}Sign up · TickIt{% endblock %}
 
 {% block content %}
-    <h1>Create your account</h1>
-    <form method="post" class="form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        {{ form.as_p() }}
-        <button type="submit" class="btn btn-primary">Sign up</button>
-    </form>
+    <div class="auth-wrap">
+        <div class="auth-card">
+            <span class="auth-brand">🎟️ TickIt</span>
+            <p class="auth-sub">Create your account</p>
+            <form method="post">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                {{ form.as_p() }}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign up</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}

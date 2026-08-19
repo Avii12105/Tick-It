@@ -3,56 +3,74 @@
 {% block title %}{{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <h1>{{ event.name }}</h1>
-        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">Back to events</a>
-    </div>
-    <p class="muted">
-        {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
-    </p>
-    <div class="card">
-        <p>
-            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
-            Allocated capacity: {{ used_capacity }} / {{ event.allocated_capacity }}
-            (venue max {{ event.venue.max_capacity }})
-        </p>
-        <p>{{ event.description }}</p>
-        <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit event</a>
+    <div class="header-row">
+        <div>
+            <h1>{{ event.name }}</h1>
+            <p class="page-subtitle">
+                {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
+            </p>
+        </div>
+        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-outline">Back to events</a>
     </div>
 
-    <div class="row">
+    <div class="card">
+        {% set pct = (event.allocated_capacity * 100 / event.venue.max_capacity) | int %}
+        <div class="event-meta">
+            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+            <span>Allocated capacity: {{ used_capacity }} / {{ event.allocated_capacity }} (venue max {{ event.venue.max_capacity }})</span>
+        </div>
+        <div class="progress">
+            <div class="progress-fill" style="width: {{ pct }}%;"></div>
+        </div>
+        <p style="margin-top: 12px;">{{ event.description }}</p>
+        <div class="event-card-actions">
+            <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-outline btn-sm">Edit event</a>
+        </div>
+    </div>
+
+    <div class="header-row">
         <h2>Ticket tiers</h2>
         <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary">+ Add tier</a>
     </div>
     {% if ticket_types %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Allocated</th>
-                    <th>Sold</th>
-                    <th>Available</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tt in ticket_types %}
+        <div class="table-card">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ tt.name }}</td>
-                        <td>₹{{ tt.price }}</td>
-                        <td>{{ tt.quantity_total }}</td>
-                        <td>{{ tt.quantity_sold }}</td>
-                        <td>{{ tt.available_count() }}</td>
-                        <td>
-                            <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-secondary">Edit</a>
-                            <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger">Delete</a>
-                        </td>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Allocated</th>
+                        <th>Sold</th>
+                        <th>Available</th>
+                        <th>Actions</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for tt in ticket_types %}
+                        {% set sold_pct = (tt.quantity_sold * 100 / tt.quantity_total) if tt.quantity_total else 0 %}
+                        <tr>
+                            <td><strong>{{ tt.name }}</strong></td>
+                            <td>₹{{ tt.price }}</td>
+                            <td>{{ tt.quantity_total }}</td>
+                            <td>{{ tt.quantity_sold }}</td>
+                            <td>
+                                <span class="badge {{ 'badge-published' if tt.available_count() > 0 else 'badge-soldout' }}">{{ tt.available_count() }}</span>
+                                <div class="progress">
+                                    <div class="progress-fill" style="width: {{ sold_pct }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-outline btn-sm">Edit</a>
+                                <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p class="muted">No ticket tiers yet. Add one to start selling.</p>
+        <div class="card">
+            <p class="muted">No ticket tiers yet. Add one to start selling.</p>
+        </div>
     {% endif %}
 {% endblock %}

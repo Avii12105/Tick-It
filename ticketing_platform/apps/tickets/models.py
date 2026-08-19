@@ -122,3 +122,41 @@ def validate_ticket_type_capacity(ticket_type):
                 )
             }
         )
+
+
+class Ticket(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Active"
+        USED = "used", "Used"
+        REFUNDED = "refunded", "Refunded"
+        CANCELLED = "cancelled", "Cancelled"
+
+    ticket_type = models.ForeignKey(
+        TicketType,
+        on_delete=models.PROTECT,
+        related_name="tickets",
+    )
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.PROTECT,
+        related_name="tickets",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="tickets",
+    )
+    unique_code = models.CharField(max_length=64, unique=True)
+    qr_image = models.ImageField(upload_to="qr/", blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+    )
+    purchased_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-purchased_at",)
+
+    def __str__(self):
+        return f"{self.unique_code} ({self.ticket_type.name} @ {self.event.name})"

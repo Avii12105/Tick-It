@@ -1,19 +1,27 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
+import tempfile
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db.utils import OperationalError
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import Profile
 from apps.events.models import Event, Venue
 
-from .models import Reservation, TicketType
-from .services import RESERVATION_LOCK_MINUTES, reserve_tickets
+from .models import Reservation, Ticket, TicketType
+from .services import (
+    RESERVATION_LOCK_MINUTES,
+    checkout_cart,
+    generate_unique_code,
+    reserve_tickets,
+)
 
 User = get_user_model()
 
@@ -292,3 +300,123 @@ class ReservationConcurrencyTests(TransactionTestCase):
         self.assertEqual(results.count(True), 1)
         self.assertEqual(results.count(False), 3)
         self.assertEqual(tier.reserved_count(), 1)
+
+
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
+class CheckoutTests(TestCase):
+    def setUp(self):
+        self.user = make_user("buyer")
+        self.org = make_user("seller_org", Profile.Role.ORGANIZER)
+        self.venue = Venue.objects.create(
+            name="Arena", max_capacity=100, owner=self.org
+        )
+        self.event = Event.objects.create(
+            venue=self.venue,
+            organizer=self.org,
+            name="Rock Fest",
+            date=timezone.now() + timedelta(days=5),
+            allocated_capacity=100,
+            status=Event.Status.PUBLISHED,
+        )
+        self.tier = TicketType.objects.create(
+            event=self.event, name="GA", price=500, quantity_total=50
+        )
+
+    def reserve(self, quantity=1, user=None, tier=None):
+        return reserve_tickets((tier or self.tier).pk, user or self.user, quantity)
+
+    def test_checkout_converts_reservation_to_tickets(self):
+        self.reserve(quantity=3)
+        tickets = checkout_cart(self.user)
+
+        self.assertEqual(len(tickets), 3)
+        self.assertTrue(
+            all(t.status == Ticket.Status.ACTIVE for t in tickets)
+        )
+        self.assertTrue(
+            all(t.ticket_type_id == self.tier.pk for t in tickets)
+        )
+        self.assertTrue(all(t.event_id == self.event.pk for t in tickets))
+        self.assertTrue(all(t.user_id == self.user.pk for t in tickets))
+        for t in tickets:
+            self.assertTrue(t.qr_image)
+            self.assertTrue(t.qr_image.name.startswith("qr/"))
+            self.assertTrue(default_storage.exists(t.qr_image.name))
+
+    def test_checkout_increments_sold_and_marks_reservation_converted(self):
+        self.reserve(quantity=2)
+        checkout_cart(self.user)
+
+        self.tier.refresh_from_db()
+        self.assertEqual(self.tier.quantity_sold, 2)
+        self.assertEqual(self.tier.reserved_count(), 0)
+        reservation = Reservation.objects.get(user=self.user)
+        self.assertEqual(reservation.status, Reservation.Status.CONVERTED)
+
+    def test_checkout_empty_cart_raises(self):
+        with self.assertRaises(ValidationError):
+            checkout_cart(self.user)
+
+    def test_checkout_expired_reservation_raises(self):
+        reservation = self.reserve()
+        Reservation.objects.filter(pk=reservation.pk).update(
+            expires_at=timezone.now() - timedelta(minutes=1)
+        )
+        with self.assertRaises(ValidationError):
+            checkout_cart(self.user)
+        self.tier.refresh_from_db()
+        self.assertEqual(self.tier.quantity_sold, 0)
+        reservation.refresh_from_db()
+        self.assertEqual(reservation.status, Reservation.Status.ACTIVE)
+
+    def test_duplicate_checkout_of_same_reservation_blocks(self):
+        self.reserve(quantity=1)
+        checkout_cart(self.user)
+        with self.assertRaises(ValidationError):
+            checkout_cart(self.user)
+        self.tier.refresh_from_db()
+        self.assertEqual(self.tier.quantity_sold, 1)
+        self.assertEqual(Ticket.objects.filter(user=self.user).count(), 1)
+
+    def test_codes_are_unique(self):
+        codes = [generate_unique_code() for _ in range(20)]
+        self.assertEqual(len(set(codes)), len(codes))
+
+    def test_ticket_codes_unique_across_checkouts(self):
+        self.reserve(quantity=5)
+        tickets = checkout_cart(self.user)
+        codes = [t.unique_code for t in tickets]
+        self.assertEqual(len(set(codes)), 5)
+
+    def test_checkout_view_redirects_to_my_tickets(self):
+        self.reserve(quantity=1)
+        self.client.force_login(self.user)
+        response = self.client.post(reverse("tickets:checkout"))
+        self.assertRedirects(response, reverse("tickets:my_tickets"))
+
+    def test_checkout_view_requires_login(self):
+        response = self.client.get(reverse("tickets:checkout"))
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:login')}?next={reverse('tickets:checkout')}",
+        )
+
+    def test_my_tickets_view_shows_purchased(self):
+        self.reserve(quantity=1)
+        checkout_cart(self.user)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("tickets:my_tickets"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.event.name)
+        self.assertContains(response, "GA")
+
+    def test_ticket_detail_view_shows_qr(self):
+        self.reserve(quantity=1)
+        ticket = checkout_cart(self.user)[0]
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("tickets:ticket_detail", args=[ticket.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, ticket.unique_code)
+        self.assertContains(response, ticket.qr_image.url)

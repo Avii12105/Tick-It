@@ -34,7 +34,11 @@
                 {% endfor %}
             </tbody>
         </table>
-        <p class="muted">Checkout arrives in V3.</p>
+        <form method="post" action="{{ url('tickets:checkout') }}">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-primary">Checkout All</button>
+        </form>
+        <p class="muted">Tickets are held for 10 minutes. Complete checkout before they expire.</p>
     {% else %}
         <p class="muted">Your cart is empty. Add tickets from an event page.</p>
     {% endif %}

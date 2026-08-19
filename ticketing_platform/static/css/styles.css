@@ -1,30 +1,93 @@
+/* ============================================================
+   TickIt — Liquid Glass Design System
+   Dark aurora (default) + Light prism via prefers-color-scheme
+   ============================================================ */
+
 :root {
-    --canvas: #F9FAFB;
-    --surface: #FFFFFF;
-    --surface-muted: #F2F4F7;
-    --border: #EAECF0;
-    --border-strong: #D0D5DD;
-    --accent-light: #E0EAFF;
-    --text-primary: #101828;
-    --text-secondary: #475467;
-    --text-muted: #667085;
-    --sidebar-inactive: #344054;
-    --brand: #101828;
-    --success: #027A48;
-    --success-light: #ECFDF3;
-    --danger: #B42318;
-    --danger-light: #FEF3F2;
-    --indigo-text: #3730A3;
-    --indigo-light: #E0EAFF;
-    --gray-text: #344054;
-    --gray-light: #F2F4F7;
-    --shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --radius-xs: 4px;
-    --topbar-h: 64px;
-    --sidebar-w: 240px;
+    /* Core surfaces */
+    --canvas: #060512;
+    --canvas-deep: #03020a;
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-bg-strong: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.14);
+    --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    --glass-shadow: 0 12px 40px rgba(3, 2, 18, 0.55);
+
+    /* Text */
+    --text-primary: #f3f5ff;
+    --text-secondary: #c8cff0;
+    --text-muted: #8f98c9;
+
+    /* Brand / accent */
+    --brand: #7c7bff;
+    --brand-2: #22d3ee;
+    --brand-3: #f472b6;
+    --brand-grad: linear-gradient(120deg, #8b7bff, #22d3ee 55%, #f472b6);
+
+    /* Status */
+    --success: #34d399;
+    --success-soft: rgba(52, 211, 153, 0.14);
+    --danger: #fb7185;
+    --danger-soft: rgba(251, 113, 133, 0.14);
+    --indigo: #a5b4fc;
+    --indigo-soft: rgba(165, 180, 252, 0.16);
+    --gray: #c8ccdd;
+    --gray-soft: rgba(200, 204, 221, 0.12);
+
+    /* Aurora palette */
+    --aurora-1: #5b4bff;
+    --aurora-2: #22d3ee;
+    --aurora-3: #f472b6;
+    --aurora-4: #a855f7;
+
+    /* Geometry */
+    --radius-lg: 20px;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --radius-xs: 8px;
+    --blur: blur(22px);
+    --topbar-h: 68px;
+    --sidebar-w: 248px;
+
+    --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --canvas: #eef0ff;
+        --canvas-deep: #e6e9ff;
+        --glass-bg: rgba(255, 255, 255, 0.55);
+        --glass-bg-strong: rgba(255, 255, 255, 0.72);
+        --glass-border: rgba(255, 255, 255, 0.85);
+        --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+        --glass-shadow: 0 12px 40px rgba(124, 110, 255, 0.18);
+
+        --text-primary: #1c1b3a;
+        --text-secondary: #464a72;
+        --text-muted: #777ca8;
+
+        --brand: #6d5cff;
+        --brand-grad: linear-gradient(120deg, #6d5cff, #0891b2 55%, #db2777);
+
+        --success: #059669;
+        --success-soft: rgba(5, 150, 105, 0.12);
+        --danger: #dc2626;
+        --danger-soft: rgba(220, 38, 38, 0.1);
+        --indigo: #4338ca;
+        --indigo-soft: rgba(67, 56, 202, 0.1);
+        --gray: #475569;
+        --gray-soft: rgba(71, 85, 105, 0.08);
+
+        --aurora-1: #a5b4fc;
+        --aurora-2: #67e8f9;
+        --aurora-3: #f9a8d4;
+        --aurora-4: #c084fc;
+    }
+}
+
+/* ------------------------------------------------------------------
+   Reset & base
+------------------------------------------------------------------ */
 
 * {
     box-sizing: border-box;
@@ -37,10 +100,12 @@ html {
 }
 
 body {
-    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font);
     background: var(--canvas);
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 a {
@@ -52,46 +117,187 @@ a:hover {
     text-decoration: underline;
 }
 
-/* ---------------------------------------------------------------------------
-   Top navigation
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Reactive aurora background
+------------------------------------------------------------------ */
+
+.bg-aurora {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background: var(--canvas);
+}
+
+.bg-aurora::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 60% 45% at 18% 12%, var(--aurora-1) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 40% at 85% 18%, var(--aurora-2) 0%, transparent 62%),
+        radial-gradient(ellipse 60% 45% at 70% 82%, var(--aurora-3) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 28% 88%, var(--aurora-4) 0%, transparent 60%);
+    animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+    will-change: transform;
+}
+
+.blob-1 {
+    width: 44vw;
+    height: 44vw;
+    left: -10vw;
+    top: -12vw;
+    background: radial-gradient(circle, var(--aurora-1), transparent 70%);
+    animation: blob-float-1 18s ease-in-out infinite alternate;
+}
+
+.blob-2 {
+    width: 38vw;
+    height: 38vw;
+    right: -8vw;
+    top: 18vh;
+    background: radial-gradient(circle, var(--aurora-2), transparent 70%);
+    animation: blob-float-2 22s ease-in-out infinite alternate;
+}
+
+.blob-3 {
+    width: 40vw;
+    height: 40vw;
+    left: 30vw;
+    bottom: -16vw;
+    background: radial-gradient(circle, var(--aurora-3), transparent 70%);
+    animation: blob-float-3 20s ease-in-out infinite alternate;
+}
+
+.blob-4 {
+    width: 26vw;
+    height: 26vw;
+    right: 22vw;
+    bottom: 12vh;
+    background: radial-gradient(circle, var(--aurora-4), transparent 70%);
+    animation: blob-float-4 16s ease-in-out infinite alternate;
+}
+
+/* Cursor-reactive glow layer (driven by --mx / --my from JS) */
+.cursor-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        circle 320px at calc(50% + var(--mx, 0) * 14vw) calc(50% + var(--my, 0) * 14vh),
+        rgba(255, 255, 255, 0.10),
+        transparent 70%
+    );
+}
+
+/* Film grain overlay */
+.grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes aurora-drift {
+    0%   { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
+    50%  { transform: translate(3%, 2%) scale(1.06); }
+    100% { transform: translate(-3%, -2%) scale(1.04) hue-rotate(18deg); }
+}
+
+@keyframes blob-float-1 {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(10vw, 8vh) scale(1.2); }
+}
+
+@keyframes blob-float-2 {
+    0%   { transform: translate(0, 0) scale(1.1); }
+    100% { transform: translate(-8vw, -6vh) scale(0.95); }
+}
+
+@keyframes blob-float-3 {
+    0%   { transform: translate(0, 0) scale(0.95); }
+    100% { transform: translate(-6vw, -10vh) scale(1.15); }
+}
+
+@keyframes blob-float-4 {
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(5vw, 6vh) scale(1.1); }
+}
+
+/* ------------------------------------------------------------------
+   Top navigation — frosted glass
+------------------------------------------------------------------ */
 
 .navbar {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 100;
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: var(--topbar-h);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
+    padding: 0 28px;
+    background: var(--glass-bg);
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight);
 }
 
 .navbar-brand {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--text-primary);
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.25rem;
+    background: var(--brand-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .navbar-brand:hover {
     text-decoration: none;
+    filter: brightness(1.15);
 }
 
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 26px;
 }
 
 .nav-links a {
+    position: relative;
     color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.95rem;
+    transition: color 0.25s ease;
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--brand-grad);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
 }
 
 .nav-links a:hover {
@@ -99,10 +305,14 @@ a:hover {
     text-decoration: none;
 }
 
+.nav-links a:hover::after {
+    transform: scaleX(1);
+}
+
 .nav-user {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     color: var(--text-secondary);
     font-size: 0.9rem;
 }
@@ -111,13 +321,14 @@ a:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    background: var(--brand);
+    background: var(--brand-grad);
     color: #fff;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.85rem;
+    box-shadow: 0 4px 14px rgba(124, 123, 255, 0.4);
 }
 
 .btn-link {
@@ -128,18 +339,19 @@ a:hover {
     font-size: 0.95rem;
     cursor: pointer;
     padding: 0;
-    text-decoration: none;
 }
 
 .btn-link:hover {
-    color: var(--text-primary);
+    color: var(--danger);
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Layout shell
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .layout {
+    position: relative;
+    z-index: 2;
     display: flex;
     min-height: calc(100vh - var(--topbar-h));
 }
@@ -147,48 +359,58 @@ a:hover {
 .sidebar {
     width: var(--sidebar-w);
     flex-shrink: 0;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 16px 0;
+    position: sticky;
+    top: var(--topbar-h);
+    align-self: flex-start;
+    height: calc(100vh - var(--topbar-h));
+    padding: 20px 12px;
+    background: var(--glass-bg);
+    border-right: 1px solid var(--glass-border);
+    backdrop-filter: var(--blur) saturate(150%);
+    -webkit-backdrop-filter: var(--blur) saturate(150%);
 }
 
 .sidebar-header {
-    padding: 0 28px;
-    margin-bottom: 12px;
+    padding: 0 16px;
+    margin-bottom: 16px;
     font-size: 12px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
 }
 
 .sidebar-nav a {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    margin: 4px 16px;
-    border-radius: 6px;
-    color: var(--sidebar-inactive);
+    gap: 12px;
+    padding: 10px 14px;
+    margin: 4px 0;
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
     font-weight: 500;
     font-size: 0.95rem;
+    transition: all 0.25s ease;
 }
 
 .sidebar-nav a:hover {
-    background: var(--canvas);
+    background: var(--glass-bg-strong);
     text-decoration: none;
+    color: var(--text-primary);
 }
 
 .sidebar-nav a.active {
-    background: var(--accent-light);
+    background: var(--indigo-soft);
     color: var(--text-primary);
     font-weight: 700;
+    box-shadow: inset 0 0 0 1px var(--glass-border);
 }
 
 .sidebar-icon {
-    width: 18px;
+    width: 20px;
     text-align: center;
     font-size: 1rem;
+    color: var(--brand);
 }
 
 .main {
@@ -202,33 +424,35 @@ a:hover {
     margin: 0 auto;
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Typography
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 h1 {
     color: var(--text-primary);
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 0.5rem;
-    line-height: 1.2;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
 }
 
 h2 {
     color: var(--text-primary);
     font-size: 24px;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.01em;
 }
 
 h3 {
     color: var(--text-primary);
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .page-subtitle {
-    color: var(--text-secondary);
+    color: var(--text-muted);
     font-size: 14px;
     margin-bottom: 1.5rem;
 }
@@ -238,45 +462,59 @@ h3 {
 }
 
 code {
-    background: var(--surface-muted);
-    border: 1px solid var(--border);
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xs);
     padding: 1px 6px;
     font-size: 0.85em;
+    color: var(--brand);
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Alerts
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .alert {
-    padding: 12px 16px;
+    padding: 14px 18px;
     border-radius: var(--radius-sm);
     margin-bottom: 1rem;
     font-weight: 500;
     font-size: 14px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
 }
 
 .alert-success {
-    background: var(--success-light);
+    background: var(--success-soft);
     color: var(--success);
 }
 
 .alert-error,
 .alert-warning {
-    background: var(--danger-light);
+    background: var(--danger-soft);
     color: var(--danger);
 }
 
-/* ---------------------------------------------------------------------------
-   Cards
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Glass primitives
+------------------------------------------------------------------ */
+
+.glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
 
 .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
     padding: 24px;
     margin-bottom: 1.5rem;
 }
@@ -290,62 +528,85 @@ code {
     overflow: hidden;
 }
 
-/* ---------------------------------------------------------------------------
-   Buttons
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Buttons — liquid sheen
+------------------------------------------------------------------ */
 
 .btn {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 10px 16px;
+    padding: 10px 18px;
     border-radius: var(--radius-sm);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     line-height: 1.2;
     cursor: pointer;
     text-decoration: none;
     border: none;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
+    transition: transform 0.18s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .btn:hover {
     text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.5s ease;
+}
+
+.btn:hover::after {
+    left: 120%;
 }
 
 .btn-primary {
-    background: var(--brand);
+    background: var(--brand-grad);
     color: #fff;
+    box-shadow: 0 6px 20px rgba(124, 123, 255, 0.4);
 }
 
 .btn-primary:hover {
-    background: #2c3547;
+    box-shadow: 0 10px 28px rgba(124, 123, 255, 0.55);
 }
 
 .btn-outline,
 .btn-secondary {
-    background: var(--surface);
-    color: var(--gray-text);
-    border: 1px solid var(--border-strong);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .btn-outline:hover,
 .btn-secondary:hover {
-    background: var(--surface-muted);
+    background: var(--glass-bg-strong);
 }
 
 .btn-danger {
-    background: var(--danger);
+    background: linear-gradient(120deg, #fb7185, #f43f5e);
     color: #fff;
-}
-
-.btn-danger:hover {
-    background: #911d16;
+    box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35);
 }
 
 .btn-sm {
-    padding: 6px 12px;
+    padding: 7px 13px;
     font-size: 13px;
 }
 
@@ -353,61 +614,64 @@ code {
     display: inline;
 }
 
-/* ---------------------------------------------------------------------------
-   Badges
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Badges — glass pills
+------------------------------------------------------------------ */
 
 .badge {
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: var(--radius-xs);
-    font-size: 12px;
-    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
     white-space: nowrap;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .badge-published,
 .badge-active {
-    background: var(--indigo-light);
-    color: var(--indigo-text);
+    background: var(--indigo-soft);
+    color: var(--indigo);
 }
 
 .badge-draft,
 .badge-expired {
-    background: var(--gray-light);
-    color: var(--gray-text);
+    background: var(--gray-soft);
+    color: var(--gray);
 }
 
 .badge-cancelled,
 .badge-refunded {
-    background: var(--danger-light);
+    background: var(--danger-soft);
     color: var(--danger);
 }
 
 .badge-used {
-    background: var(--success-light);
+    background: var(--success-soft);
     color: var(--success);
 }
 
 .badge-soldout {
-    background: var(--danger-light);
+    background: var(--danger-soft);
     color: var(--danger);
 }
 
 .badge-default {
-    background: var(--gray-light);
-    color: var(--gray-text);
+    background: var(--gray-soft);
+    color: var(--gray);
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Progress bars
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .progress {
-    background: var(--border);
-    height: 4px;
+    background: var(--gray-soft);
+    height: 6px;
     border-radius: 999px;
     overflow: hidden;
     margin-top: 10px;
@@ -415,23 +679,26 @@ code {
 
 .progress-fill {
     height: 100%;
-    background: var(--brand);
+    background: var(--brand-grad);
     border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .progress-fill-success {
-    background: var(--success);
+    background: linear-gradient(90deg, #34d399, #22d3ee);
 }
 
-/* ---------------------------------------------------------------------------
-   Tables
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Tables — glass panels
+------------------------------------------------------------------ */
 
 .table-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
     overflow: hidden;
     margin-bottom: 1.5rem;
 }
@@ -444,68 +711,78 @@ table {
 th,
 td {
     text-align: left;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--glass-border);
 }
 
 th {
-    background: var(--surface-muted);
-    color: var(--text-secondary);
-    font-weight: 500;
-    font-size: 12px;
+    background: var(--glass-bg-strong);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
 }
 
 tbody tr:last-child td {
     border-bottom: none;
 }
 
-tbody tr:hover td {
-    background: #FCFCFD;
+tbody tr {
+    transition: background 0.2s ease;
 }
 
-/* ---------------------------------------------------------------------------
+tbody tr:hover td {
+    background: var(--glass-bg-strong);
+}
+
+/* ------------------------------------------------------------------
    Forms
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .form-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+    padding: 28px;
     max-width: 560px;
 }
 
 .form-card p,
 .form-card fieldset {
-    margin-bottom: 1rem;
+    margin-bottom: 1.1rem;
 }
 
 .form-card label {
     display: block;
     color: var(--text-primary);
-    font-weight: 500;
-    margin-bottom: 6px;
+    font-weight: 600;
+    margin-bottom: 7px;
 }
 
 .form-card input,
 .form-card select,
 .form-card textarea {
     width: 100%;
-    height: 44px;
-    padding: 10px 12px;
-    border: 1px solid var(--border-strong);
+    height: 46px;
+    padding: 11px 14px;
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
     font-size: 14px;
+    font-family: inherit;
     color: var(--text-primary);
-    background: var(--surface);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-card textarea {
     height: auto;
-    min-height: 96px;
+    min-height: 100px;
     resize: vertical;
 }
 
@@ -514,7 +791,7 @@ tbody tr:hover td {
 .form-card textarea:focus {
     outline: none;
     border-color: var(--brand);
-    box-shadow: 0 0 0 3px var(--accent-light);
+    box-shadow: 0 0 0 3px rgba(124, 123, 255, 0.25);
 }
 
 .form-card .helptext {
@@ -526,7 +803,7 @@ tbody tr:hover td {
     color: var(--danger);
     font-size: 13px;
     list-style: none;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
 .form-actions {
@@ -541,9 +818,9 @@ tbody tr:hover td {
     margin-bottom: 1rem;
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    KPI / dashboard
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .header-row {
     display: flex;
@@ -563,15 +840,19 @@ tbody tr:hover td {
 .kpi-card .kpi-label {
     color: var(--text-secondary);
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .kpi-card .kpi-value {
     color: var(--text-primary);
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 1.1;
-    margin-top: 4px;
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.05;
+    margin-top: 6px;
+    background: var(--brand-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .kpi-card .kpi-foot {
@@ -590,18 +871,40 @@ tbody tr:hover td {
     align-items: start;
 }
 
-/* ---------------------------------------------------------------------------
-   Event cards (horizontal)
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   3D tilt — transform applied by JS
+------------------------------------------------------------------ */
+
+.tilt {
+    transform-style: preserve-3d;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    will-change: transform;
+}
+
+.tilt:hover {
+    box-shadow: var(--glass-highlight), 0 22px 60px rgba(3, 2, 18, 0.65);
+}
+
+@media (prefers-color-scheme: light) {
+    .tilt:hover {
+        box-shadow: var(--glass-highlight), 0 22px 60px rgba(124, 110, 255, 0.25);
+    }
+}
+
+/* ------------------------------------------------------------------
+   Event cards — horizontal
+------------------------------------------------------------------ */
 
 .event-card {
     display: flex;
-    gap: 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 16px;
+    gap: 18px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+    padding: 18px;
     margin-bottom: 16px;
 }
 
@@ -613,10 +916,11 @@ tbody tr:hover td {
     width: 96px;
     height: 96px;
     border-radius: var(--radius-sm);
-    background: var(--brand);
+    background: var(--brand-grad);
     color: #fff;
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: 2.2rem;
+    font-weight: 800;
+    box-shadow: 0 10px 26px rgba(124, 123, 255, 0.45);
 }
 
 .event-card-body {
@@ -628,7 +932,7 @@ tbody tr:hover td {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 4px;
+    margin-top: 6px;
     color: var(--text-muted);
     font-size: 13px;
 }
@@ -636,12 +940,12 @@ tbody tr:hover td {
 .event-card-actions {
     display: flex;
     gap: 8px;
-    margin-top: 10px;
+    margin-top: 12px;
 }
 
-/* ---------------------------------------------------------------------------
-   Timeline (recent activity)
---------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------
+   Timeline
+------------------------------------------------------------------ */
 
 .timeline {
     list-style: none;
@@ -649,20 +953,21 @@ tbody tr:hover td {
 
 .timeline li {
     position: relative;
-    padding: 0 0 16px 20px;
-    border-left: 2px solid var(--border);
+    padding: 0 0 18px 22px;
+    border-left: 2px solid var(--glass-border);
     margin-left: 6px;
 }
 
 .timeline li::before {
     content: "";
     position: absolute;
-    left: -5px;
-    top: 4px;
-    width: 8px;
-    height: 8px;
+    left: -6px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: var(--brand);
+    background: var(--brand-grad);
+    box-shadow: 0 0 12px rgba(124, 123, 255, 0.8);
 }
 
 .timeline li:last-child {
@@ -676,13 +981,13 @@ tbody tr:hover td {
 
 .timeline .t-title {
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 2px;
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Auth (login / signup)
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .auth-wrap {
     min-height: calc(100vh - var(--topbar-h));
@@ -692,11 +997,13 @@ tbody tr:hover td {
 }
 
 .auth-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 32px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+    padding: 36px;
     width: 100%;
     max-width: 400px;
 }
@@ -704,10 +1011,13 @@ tbody tr:hover td {
 .auth-card .auth-brand {
     display: block;
     text-align: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-size: 1.6rem;
+    font-weight: 800;
     margin-bottom: 4px;
+    background: var(--brand-grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .auth-card .auth-sub {
@@ -716,9 +1026,9 @@ tbody tr:hover td {
     margin-bottom: 24px;
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Confirm-delete
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 .confirm-wrap {
     min-height: calc(100vh - var(--topbar-h));
@@ -728,11 +1038,13 @@ tbody tr:hover td {
 }
 
 .confirm-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 32px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: var(--blur) saturate(160%);
+    -webkit-backdrop-filter: var(--blur) saturate(160%);
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
+    padding: 36px;
     width: 100%;
     max-width: 420px;
 }
@@ -741,9 +1053,9 @@ tbody tr:hover td {
     margin-bottom: 1.25rem;
 }
 
-/* ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------
    Responsive
---------------------------------------------------------------------------- */
+------------------------------------------------------------------ */
 
 @media (max-width: 900px) {
     .kpi-grid {
@@ -769,5 +1081,21 @@ tbody tr:hover td {
     .event-thumb {
         width: 100%;
         height: 56px;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .bg-aurora::before,
+    .blob {
+        animation: none;
+    }
+
+    .btn::after {
+        display: none;
+    }
+
+    .tilt {
+        transition: none;
     }
 }

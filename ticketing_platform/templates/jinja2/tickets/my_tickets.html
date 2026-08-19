@@ -7,7 +7,7 @@
     <p class="page-subtitle">All tickets you've purchased, ready to scan.</p>
     {% if tickets %}
         {% for t in tickets %}
-            <div class="event-card">
+            <div class="event-card tilt">
                 <div class="event-thumb">{{ t.event.name[0] | upper }}</div>
                 <div class="event-card-body">
                     <div class="event-meta">

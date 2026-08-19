@@ -158,28 +158,6 @@ python manage.py test
 
 **49 tests, all passing** — covering the capacity chain, tier guardrails, concurrency stress (4 threads racing for the last ticket), checkout conversion, duplicate-checkout protection, expired-hold rejection, QR generation, and view flows. The test suite uses a real file-based SQLite DB so threaded tests genuinely exercise locking.
 
----
-
-## 🗺️ Roadmap & Development History
-
-The project is built in versioned milestones — each one fully tested and tagged.
-
-| Version | Milestone | What shipped | Tag |
-|---|---|---|---|
-| **v1** | Accounts, Venues & Events | Role-based profiles, auth, venue & event CRUD, capacity chain, public browse of published events | `v1.0.0` |
-| **v2** | Tiered Tickets & Cart Holds | `TicketType`, 10-minute `Reservation` holds, write-lock-first concurrency, organizer tier CRUD, expire command, threaded stress tests | `v2.0.0` |
-| **v3** | QR Code Generation | Atomic checkout, unique codes, per-ticket QR PNGs, My Tickets, ticket detail with QR | `v3.0.0` |
-| **v4** *(planned)* | QR Validation at the Door | Scan & validate tickets at the venue, mark tickets `used`, refund/cancel lifecycle | — |
-
-### What's next (v4+)
-
-- QR scanning/validation flow for gate staff.
-- Ticket lifecycle: mark `used` on entry, `refunded`/`cancelled` admin actions.
-- Order history and purchase receipts.
-- Configurable hold duration per event.
-
----
-
 ## 🛠️ Tech Stack
 
 - **Django 6.1** — ORM, auth, admin, migrations

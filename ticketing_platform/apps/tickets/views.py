@@ -10,11 +10,9 @@ from apps.accounts.decorators import organizer_required
 from apps.events.models import Event
 
 from .forms import AddToCartForm, TicketTypeForm
-from .models import Reservation, TicketType
-from .services import RESERVATION_LOCK_MINUTES, reserve_tickets
+from .models import Reservation, Ticket, TicketType
+from .services import RESERVATION_LOCK_MINUTES, checkout_cart, reserve_tickets
 
-
-# --- Attendee cart ---------------------------------------------------------
 
 def cart(request):
     reservations = (
@@ -76,6 +74,39 @@ def remove_from_cart(request, pk):
         ).delete()
         messages.success(request, "Removed from cart.")
     return redirect("tickets:cart")
+
+
+@login_required(login_url="accounts:login")
+def checkout(request):
+    if request.method == "POST":
+        try:
+            tickets = checkout_cart(request.user)
+            messages.success(
+                request,
+                f"Purchased {len(tickets)} ticket(s). See 'My Tickets'.",
+            )
+            return redirect("tickets:my_tickets")
+        except ValidationError as exc:
+            for error in exc.messages:
+                messages.error(request, error)
+            return redirect("tickets:cart")
+    return redirect("tickets:cart")
+
+
+@login_required(login_url="accounts:login")
+def my_tickets(request):
+    tickets = (
+        Ticket.objects.filter(user=request.user)
+        .select_related("ticket_type", "event__venue")
+        .order_by("-purchased_at")
+    )
+    return render(request, "tickets/my_tickets.html", {"tickets": tickets})
+
+
+@login_required(login_url="accounts:login")
+def ticket_detail(request, pk):
+    ticket = get_object_or_404(Ticket, pk=pk, user=request.user)
+    return render(request, "tickets/ticket_detail.html", {"ticket": ticket})
 
 
 # --- Organizer: Ticket tiers -----------------------------------------------

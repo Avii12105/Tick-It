@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Reservation, TicketType
+from .models import Reservation, Ticket, TicketType
 
 
 @admin.register(TicketType)
@@ -33,3 +33,17 @@ class ReservationAdmin(admin.ModelAdmin):
     )
     list_filter = ("status", "ticket_type__event")
     search_fields = ("user__username", "ticket_type__name")
+
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    list_display = (
+        "unique_code",
+        "user",
+        "ticket_type",
+        "event",
+        "status",
+        "purchased_at",
+    )
+    list_filter = ("status", "event")
+    search_fields = ("unique_code", "user__username")

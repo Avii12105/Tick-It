@@ -1,0 +1,22 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Ticket {{ ticket.unique_code[:8] }} · TickIt{% endblock %}
+
+{% block content %}
+    <h1>Ticket</h1>
+    <div class="card">
+        <p><strong>Event:</strong> {{ ticket.event.name }}</p>
+        <p><strong>Venue:</strong> {{ ticket.event.venue.name }}</p>
+        <p><strong>Date:</strong> {{ ticket.event.date.strftime('%b %d, %Y %I:%M %p') }}</p>
+        <p><strong>Tier:</strong> {{ ticket.ticket_type.name }}</p>
+        <p><strong>Status:</strong> <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display() }}</span></p>
+        <p><strong>Code:</strong> <code>{{ ticket.unique_code }}</code></p>
+        {% if ticket.qr_image %}
+            <div style="text-align: center; margin: 1rem 0;">
+                <img src="{{ ticket.qr_image.url }}" alt="QR Code" style="max-width: 200px;">
+            </div>
+        {% endif %}
+        <p class="muted">Purchased: {{ ticket.purchased_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+    </div>
+    <p><a href="{{ url('tickets:my_tickets') }}" class="btn btn-secondary">Back to My Tickets</a></p>
+{% endblock %}

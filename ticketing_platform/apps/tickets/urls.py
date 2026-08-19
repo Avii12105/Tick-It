@@ -8,6 +8,9 @@ urlpatterns = [
     path("cart/", views.cart, name="cart"),
     path("cart/add/", views.add_to_cart, name="add_to_cart"),
     path("cart/remove/<int:pk>/", views.remove_from_cart, name="remove_from_cart"),
+    path("cart/checkout/", views.checkout, name="checkout"),
+    path("my-tickets/", views.my_tickets, name="my_tickets"),
+    path("tickets/<int:pk>/", views.ticket_detail, name="ticket_detail"),
     path(
         "organizer/events/<int:event_pk>/tickets/new/",
         views.ticket_type_create,

@@ -1,0 +1,35 @@
+{% extends "base/layout.html" %}
+
+{% block title %}My Tickets · TickIt{% endblock %}
+
+{% block content %}
+    <h1>My Tickets</h1>
+    {% if tickets %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Tier</th>
+                    <th>Code</th>
+                    <th>Status</th>
+                    <th>Purchased</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tickets %}
+                    <tr>
+                        <td>{{ t.event.name }}</td>
+                        <td>{{ t.ticket_type.name }}</td>
+                        <td><code>{{ t.unique_code[:8] }}...</code></td>
+                        <td><span class="badge badge-{{ t.status }}">{{ t.get_status_display() }}</span></td>
+                        <td>{{ t.purchased_at.strftime('%b %d, %Y') }}</td>
+                        <td><a href="{{ url('tickets:ticket_detail', t.pk) }}" class="btn btn-secondary">View</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="muted">You haven't purchased any tickets yet.</p>
+    {% endif %}
+{% endblock %}

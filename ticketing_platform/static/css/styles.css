@@ -1,6 +1,6 @@
 /* ============================================================
-   TickIt — Liquid Glass Design System
-   Dark aurora (default) + Light prism via prefers-color-scheme
+   TickIt — Glass design system
+   Dark (default) + Light via prefers-color-scheme
    ============================================================ */
 
 :root {
@@ -33,12 +33,6 @@
     --indigo-soft: rgba(165, 180, 252, 0.16);
     --gray: #c8ccdd;
     --gray-soft: rgba(200, 204, 221, 0.12);
-
-    /* Aurora palette */
-    --aurora-1: #5b4bff;
-    --aurora-2: #22d3ee;
-    --aurora-3: #f472b6;
-    --aurora-4: #a855f7;
 
     /* Geometry */
     --radius-lg: 20px;
@@ -77,11 +71,6 @@
         --indigo-soft: rgba(67, 56, 202, 0.1);
         --gray: #475569;
         --gray-soft: rgba(71, 85, 105, 0.08);
-
-        --aurora-1: #a5b4fc;
-        --aurora-2: #67e8f9;
-        --aurora-3: #f9a8d4;
-        --aurora-4: #c084fc;
     }
 }
 
@@ -115,124 +104,6 @@ a {
 
 a:hover {
     text-decoration: underline;
-}
-
-/* ------------------------------------------------------------------
-   Reactive aurora background
------------------------------------------------------------------- */
-
-.bg-aurora {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-    background: var(--canvas);
-}
-
-.bg-aurora::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 60% 45% at 18% 12%, var(--aurora-1) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 40% at 85% 18%, var(--aurora-2) 0%, transparent 62%),
-        radial-gradient(ellipse 60% 45% at 70% 82%, var(--aurora-3) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 28% 88%, var(--aurora-4) 0%, transparent 60%);
-    animation: aurora-drift 26s ease-in-out infinite alternate;
-}
-
-.blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(60px);
-    opacity: 0.5;
-    will-change: transform;
-}
-
-.blob-1 {
-    width: 44vw;
-    height: 44vw;
-    left: -10vw;
-    top: -12vw;
-    background: radial-gradient(circle, var(--aurora-1), transparent 70%);
-    animation: blob-float-1 18s ease-in-out infinite alternate;
-}
-
-.blob-2 {
-    width: 38vw;
-    height: 38vw;
-    right: -8vw;
-    top: 18vh;
-    background: radial-gradient(circle, var(--aurora-2), transparent 70%);
-    animation: blob-float-2 22s ease-in-out infinite alternate;
-}
-
-.blob-3 {
-    width: 40vw;
-    height: 40vw;
-    left: 30vw;
-    bottom: -16vw;
-    background: radial-gradient(circle, var(--aurora-3), transparent 70%);
-    animation: blob-float-3 20s ease-in-out infinite alternate;
-}
-
-.blob-4 {
-    width: 26vw;
-    height: 26vw;
-    right: 22vw;
-    bottom: 12vh;
-    background: radial-gradient(circle, var(--aurora-4), transparent 70%);
-    animation: blob-float-4 16s ease-in-out infinite alternate;
-}
-
-/* Cursor-reactive glow layer (driven by --mx / --my from JS) */
-.cursor-glow {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: radial-gradient(
-        circle 320px at calc(50% + var(--mx, 0) * 14vw) calc(50% + var(--my, 0) * 14vh),
-        rgba(255, 255, 255, 0.10),
-        transparent 70%
-    );
-}
-
-/* Film grain overlay */
-.grain {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-@keyframes aurora-drift {
-    0%   { transform: translate(0, 0) scale(1); filter: hue-rotate(0deg); }
-    50%  { transform: translate(3%, 2%) scale(1.06); }
-    100% { transform: translate(-3%, -2%) scale(1.04) hue-rotate(18deg); }
-}
-
-@keyframes blob-float-1 {
-    0%   { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(10vw, 8vh) scale(1.2); }
-}
-
-@keyframes blob-float-2 {
-    0%   { transform: translate(0, 0) scale(1.1); }
-    100% { transform: translate(-8vw, -6vh) scale(0.95); }
-}
-
-@keyframes blob-float-3 {
-    0%   { transform: translate(0, 0) scale(0.95); }
-    100% { transform: translate(-6vw, -10vh) scale(1.15); }
-}
-
-@keyframes blob-float-4 {
-    0%   { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(5vw, 6vh) scale(1.1); }
 }
 
 /* ------------------------------------------------------------------
@@ -872,26 +743,6 @@ tbody tr:hover td {
 }
 
 /* ------------------------------------------------------------------
-   3D tilt — transform applied by JS
------------------------------------------------------------------- */
-
-.tilt {
-    transform-style: preserve-3d;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    will-change: transform;
-}
-
-.tilt:hover {
-    box-shadow: var(--glass-highlight), 0 22px 60px rgba(3, 2, 18, 0.65);
-}
-
-@media (prefers-color-scheme: light) {
-    .tilt:hover {
-        box-shadow: var(--glass-highlight), 0 22px 60px rgba(124, 110, 255, 0.25);
-    }
-}
-
-/* ------------------------------------------------------------------
    Event cards — horizontal
 ------------------------------------------------------------------ */
 
@@ -1086,16 +937,7 @@ tbody tr:hover td {
 
 /* Respect reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
-    .bg-aurora::before,
-    .blob {
-        animation: none;
-    }
-
     .btn::after {
         display: none;
-    }
-
-    .tilt {
-        transition: none;
     }
 }

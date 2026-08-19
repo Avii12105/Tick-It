@@ -13,7 +13,7 @@
         <a href="{{ url('events:organizer_event_list') }}" class="btn btn-outline">Back to events</a>
     </div>
 
-    <div class="card tilt">
+    <div class="card">
         {% set pct = (event.allocated_capacity * 100 / event.venue.max_capacity) | int %}
         <div class="event-meta">
             <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>

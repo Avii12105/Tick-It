@@ -8,7 +8,7 @@
     {% if events %}
         {% for event in events %}
             {% set pct = (event.allocated_capacity * 100 / event.venue.max_capacity) | int %}
-            <div class="event-card tilt">
+            <div class="event-card">
                 <div class="event-thumb">{{ event.name[0] | upper }}</div>
                 <div class="event-card-body">
                     <div class="event-meta">

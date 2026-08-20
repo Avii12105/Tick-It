@@ -1,19 +1,37 @@
 {% extends "base/layout.html" %}
 
 {% block title %}Sign up · TickIt{% endblock %}
+{% block container_class %}{% endblock %}
 
 {% block content %}
-    <div class="auth-wrap">
-        <div class="auth-card">
-            <span class="auth-brand">🎟️ TickIt</span>
-            <p class="auth-sub">Create your account</p>
-            <form method="post">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                {{ form.as_p() }}
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign up</button>
-                </div>
-            </form>
-        </div>
+<div class="auth-shell">
+  <div class="auth-card" style="max-width:480px;">
+    <div class="auth-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5V9Z" stroke="var(--indigo)" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M15 7v10" stroke="var(--indigo)" stroke-width="1.8" stroke-dasharray="2 2.5" stroke-linecap="round"/>
+      </svg>
+      TickIt
     </div>
+
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-sub">Join as an attendee or organizer — your role is set once at signup.</p>
+
+    {% if form.non_field_errors() %}
+      <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+    {% endif %}
+
+    <form method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ form.as_p() }}
+      <div class="form-actions" style="margin-top:1.5rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;">Create account</button>
+      </div>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a href="{{ url('accounts:login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

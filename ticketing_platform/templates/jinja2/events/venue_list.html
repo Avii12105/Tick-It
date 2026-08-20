@@ -3,40 +3,41 @@
 {% block title %}My Venues · TickIt{% endblock %}
 
 {% block content %}
-    <div class="header-row">
-        <div>
-            <h1>My Venues</h1>
-            <p class="page-subtitle">Manage the venues your events are hosted at.</p>
-        </div>
-        <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+  <div class="page-header-row">
+    <div class="page-header">
+      <p class="page-header__eyebrow">Back office</p>
+      <h1 class="page-header__title">My Venues</h1>
+      <p class="page-header__sub">Venues are reusable across multiple events.</p>
     </div>
-    {% if venues %}
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Max Capacity</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for venue in venues %}
-                        <tr>
-                            <td><strong><a href="{{ url('events:venue_detail', venue.pk) }}">{{ venue.name }}</a></strong></td>
-                            <td>{{ venue.max_capacity }}</td>
-                            <td>
-                                <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-outline btn-sm">Edit</a>
-                                <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">Delete</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+  </div>
+
+  {% if venues %}
+    <div class="venue-cards">
+      {% for venue in venues %}
+        <div class="venue-card">
+          <div>
+            <p class="venue-card__name">{{ venue.name }}</p>
+            <p class="venue-card__address">{{ venue.address if venue.address else 'No address set' }}</p>
+          </div>
+          <div class="venue-card__cap">
+            <span class="venue-card__cap-label">Max capacity</span>
+            <span class="venue-card__cap-value">{{ venue.max_capacity }}</span>
+          </div>
+          <div class="venue-card__actions">
+            <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-secondary btn-sm">View</a>
+            <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+          </div>
         </div>
-    {% else %}
-        <div class="card">
-            <p class="muted">You have no venues yet. Create your first venue.</p>
-        </div>
-    {% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">📍</div>
+      <p class="empty-state__title">No venues yet</p>
+      <p class="empty-state__text">Create a venue before you can create events.</p>
+      <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+    </div>
+  {% endif %}
 {% endblock %}

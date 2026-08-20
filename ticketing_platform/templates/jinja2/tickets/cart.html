@@ -3,42 +3,99 @@
 {% block title %}My Cart · TickIt{% endblock %}
 
 {% block content %}
-    <h1>My Cart</h1>
-    <p class="page-subtitle">Tickets are held for 10 minutes. Complete checkout before they expire.</p>
-    {% if reservations %}
-        {% for r in reservations %}
-            <div class="event-card">
-                <div class="event-thumb">{{ r.ticket_type.event.name[0] | upper }}</div>
-                <div class="event-card-body">
-                    <div class="event-meta">
-                        <span class="badge badge-published">Held</span>
-                        <span>Held until {{ r.expires_at.strftime('%b %d, %I:%M %p') }}</span>
-                    </div>
-                    <h3><a href="{{ url('events:public_event_detail', r.ticket_type.event_id) }}">{{ r.ticket_type.event.name }}</a></h3>
-                    <div class="event-meta">
-                        <span>{{ r.ticket_type.name }}</span>
-                        <span>·</span>
-                        <span>{{ r.ticket_type.event.date.strftime('%b %d, %Y %I:%M %p') }}</span>
-                    </div>
-                    <div class="event-meta">
-                        <span>{{ r.quantity }} × ₹{{ r.ticket_type.price }} = <strong>₹{{ r.ticket_type.price * r.quantity }}</strong></span>
-                    </div>
-                    <div class="event-card-actions">
-                        <form method="post" action="{{ url('tickets:remove_from_cart', r.pk) }}" class="inline">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
-        <form method="post" action="{{ url('tickets:checkout') }}" style="margin-top: 8px;">
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-            <button type="submit" class="btn btn-primary">Checkout All</button>
-        </form>
-    {% else %}
-        <div class="card">
-            <p class="muted">Your cart is empty. Add tickets from an event page.</p>
+  <div class="page-header">
+    <p class="page-header__eyebrow">Checkout</p>
+    <h1 class="page-header__title">My Cart</h1>
+  </div>
+
+  {% if reservations %}
+    {%- set ns = namespace(grand_total=0) -%}
+    {%- for r in reservations -%}{%- set ns.grand_total = ns.grand_total + (r.ticket_type.price * r.quantity) -%}{%- endfor -%}
+
+    <div class="cart-layout">
+      <div class="cart-layout__main">
+        <div class="ledger-wrap">
+          <table class="ledger">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Tier</th>
+                <th>Qty</th>
+                <th>Price each</th>
+                <th>Subtotal</th>
+                <th>Hold expires</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in reservations %}
+                <tr>
+                  <td>
+                    <a href="{{ url('events:public_event_detail', r.ticket_type.event_id) }}" style="font-weight:700;color:var(--text-1);">
+                      {{ r.ticket_type.event.name }}
+                    </a>
+                    <p style="font-size:.68rem;color:var(--text-3);font-weight:600;margin:2px 0 0;">
+                      {{ r.ticket_type.event.date.strftime('%b %d, %Y') }}
+                    </p>
+                  </td>
+                  <td style="font-size:.85rem;font-weight:600;">{{ r.ticket_type.name }}</td>
+                  <td class="mono">{{ r.quantity }}</td>
+                  <td class="mono">₹{{ r.ticket_type.price }}</td>
+                  <td class="mono" style="color:var(--indigo);font-weight:800;">₹{{ (r.ticket_type.price * r.quantity) }}</td>
+                  <td>
+                    <span style="font-size:.75rem;color:var(--indigo);font-weight:800;">
+                      {{ r.expires_at.strftime('%I:%M %p') }}
+                    </span>
+                  </td>
+                  <td>
+                    <form method="post" action="{{ url('tickets:remove_from_cart', r.pk) }}" class="inline">
+                      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                      <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-    {% endif %}
+      </div>
+
+      <aside>
+        <div class="cart-summary">
+          <p class="cart-summary__title">Order summary</p>
+
+          {% for r in reservations %}
+            <div class="cart-summary__line">
+              <span>{{ r.ticket_type.event.name }} &times; {{ r.quantity }}</span>
+              <strong>₹{{ (r.ticket_type.price * r.quantity) }}</strong>
+            </div>
+          {% endfor %}
+
+          <div class="cart-summary__total">
+            <span class="cart-summary__total-label">Total</span>
+            <span class="cart-summary__total-value">₹{{ ns.grand_total }}</span>
+          </div>
+
+          <form method="post" action="{{ url('tickets:checkout') }}" style="margin-top:1rem;">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+              Checkout
+            </button>
+          </form>
+
+          <p style="font-size:.62rem;font-weight:600;color:var(--text-4);text-align:center;margin-top:.75rem;letter-spacing:.02em;">
+            Holds expire 10 min after reservation
+          </p>
+        </div>
+      </aside>
+    </div>
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state__icon">🛒</div>
+      <p class="empty-state__title">Your cart is empty</p>
+      <p class="empty-state__text">Find an event and reserve your tickets.</p>
+      <a href="{{ url('events:home') }}" class="btn btn-primary">Browse events</a>
+    </div>
+  {% endif %}
 {% endblock %}

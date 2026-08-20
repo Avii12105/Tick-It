@@ -1,40 +1,79 @@
 {% extends "base/layout.html" %}
 
-{% block title %}Ticket {{ ticket.unique_code[:8] }} · TickIt{% endblock %}
+{% block title %}Ticket · {{ ticket.event.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <div class="header-row">
+  <nav class="breadcrumb">
+    <a href="{{ url('tickets:my_tickets') }}">My Tickets</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__current">{{ ticket.event.name }}</span>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-header__eyebrow">Wallet</p>
+    <h1 class="page-header__title">Your Ticket</h1>
+  </div>
+
+  <div class="pass-layout" style="margin-bottom:2rem;">
+    <div class="pass-layout__divider" aria-hidden="true"></div>
+
+    {% if ticket.status == 'valid' %}
+      <span class="pass-stamp pass-stamp--valid" aria-hidden="true">Valid</span>
+    {% elif ticket.status == 'checked_in' %}
+      <span class="pass-stamp pass-stamp--checkedin" aria-hidden="true">Checked in</span>
+    {% endif %}
+
+    <div class="pass-layout__info">
+      <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--indigo);margin:0 0 4px;">
+        {{ ticket.ticket_type.name }}
+      </p>
+      <p style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:var(--text-1);line-height:1.2;margin:0 0 10px;">
+        {{ ticket.event.name }}
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
+        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
+          {{ ticket.event.date.strftime('%A, %B %d, %Y') }}
+        </span>
+        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
+          {{ ticket.event.date.strftime('%I:%M %p') }}
+        </span>
+        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
+          {{ ticket.event.venue.name }}{% if ticket.event.venue.address %} · {{ ticket.event.venue.address }}{% endif %}
+        </span>
+      </div>
+
+      <div style="border-top:1px solid rgba(61,43,34,0.1);padding-top:12px;display:flex;gap:1.5rem;flex-wrap:wrap;">
         <div>
-            <h1>Ticket</h1>
-            <p class="page-subtitle">{{ ticket.event.name }}</p>
+          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Status</p>
+          <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display() }}</span>
         </div>
-        <a href="{{ url('tickets:my_tickets') }}" class="btn btn-outline">Back to My Tickets</a>
+        <div>
+          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Purchased</p>
+          <p style="font-size:.82rem;font-weight:700;color:var(--text-1);margin:0;">
+            {{ ticket.purchased_at.strftime('%b %d, %Y') }}
+          </p>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 4px;">Ticket code</p>
+        <code style="font-size:.72rem;color:var(--text-3);word-break:break-all;">{{ ticket.unique_code }}</code>
+      </div>
     </div>
 
-    <div class="card">
-        <div class="event-meta">
-            <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display() }}</span>
-            <span>Purchased {{ ticket.purchased_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+    <div class="pass-layout__stub">
+      {% if ticket.qr_image %}
+        <img class="pass-layout__qr" src="{{ ticket.qr_image.url }}" alt="QR code">
+        <span class="pass-layout__code">{{ ticket.unique_code[:14] }}…</span>
+      {% else %}
+        <div style="width:110px;height:110px;border:2px dashed rgba(255,248,238,.3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:.58rem;color:rgba(255,248,238,.5);text-align:center;padding:8px;font-weight:700;">QR<br>pending</span>
         </div>
-        <div class="event-meta" style="margin-top: 8px;">
-            <span><strong>Event:</strong> {{ ticket.event.name }}</span>
-        </div>
-        <div class="event-meta">
-            <span><strong>Venue:</strong> {{ ticket.event.venue.name }}</span>
-        </div>
-        <div class="event-meta">
-            <span><strong>Date:</strong> {{ ticket.event.date.strftime('%b %d, %Y %I:%M %p') }}</span>
-        </div>
-        <div class="event-meta">
-            <span><strong>Tier:</strong> {{ ticket.ticket_type.name }}</span>
-        </div>
-        <div class="event-meta">
-            <span><strong>Code:</strong> <code>{{ ticket.unique_code }}</code></span>
-        </div>
-        {% if ticket.qr_image %}
-            <div style="text-align: center; margin: 20px 0;">
-                <img src="{{ ticket.qr_image.url }}" alt="QR Code" style="max-width: 200px; border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fff;">
-            </div>
-        {% endif %}
+      {% endif %}
+      <span class="badge badge-{{ ticket.status }}" style="margin-top:4px;">{{ ticket.get_status_display() }}</span>
     </div>
+  </div>
+
+  <a href="{{ url('tickets:my_tickets') }}" class="btn btn-secondary">← My Tickets</a>
 {% endblock %}

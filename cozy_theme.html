@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cozy Theme</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap');
+
+  :root{
+    --coffee: #3D2B22;
+    --linen: #F6E9D8;
+    --candle: #FFF8EE;
+    --honey: #E0913F;
+    --sienna: #A85C2E;
+    --sage: #7C9270;
+    --walnut: #7A4B30;
+    --walnut-dark: #5C3620;
+    --shadow-soft: 0 10px 25px rgba(61,43,34,0.15);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    padding:60px 24px;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(224,145,63,0.12), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(124,146,112,0.12), transparent 45%),
+      var(--linen);
+    font-family:'Nunito Sans', sans-serif;
+    color: var(--coffee);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:56px;
+  }
+
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(2.2rem, 5vw, 3.2rem);
+    margin:0;
+    text-align:center;
+  }
+  h1 span{ color: var(--sienna); font-style:italic; font-weight:600;}
+
+  .subtitle{
+    font-size:1.05rem;
+    color:#6b5644;
+    text-align:center;
+    max-width:520px;
+    margin-top:-32px;
+  }
+
+  /* --- Palette --- */
+  .palette{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .swatch{
+    width:110px;
+    text-align:center;
+    font-size:0.78rem;
+  }
+  .swatch .chip{
+    height:64px;
+    border-radius:14px;
+    box-shadow: var(--shadow-soft);
+    margin-bottom:8px;
+    border: 1px solid rgba(61,43,34,0.08);
+  }
+
+  /* --- Card --- */
+  .card{
+    background: var(--candle);
+    border-radius:22px;
+    padding:32px 36px;
+    box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(122,75,48,0.08);
+    max-width:480px;
+    width:100%;
+    text-align:center;
+  }
+  .card h2{
+    font-family:'Fraunces', serif;
+    font-size:1.5rem;
+    margin:0 0 6px;
+  }
+  .card p{
+    color:#7a6653;
+    margin:0 0 26px;
+    font-size:0.95rem;
+    line-height:1.5;
+  }
+
+  /* --- 3D Buttons --- */
+  .btn-row{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    font-family:'Nunito Sans', sans-serif;
+    font-weight:800;
+    font-size:0.95rem;
+    letter-spacing:0.2px;
+    color: var(--candle);
+    padding:14px 28px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    position:relative;
+    background: linear-gradient(180deg, var(--honey), var(--sienna));
+    box-shadow:
+      0 6px 0 var(--walnut-dark),
+      0 10px 18px rgba(90,54,32,0.35);
+    transform: translateY(0);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.15s ease;
+  }
+  .btn:hover{
+    filter: brightness(1.06);
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 0 var(--walnut-dark),
+      0 14px 22px rgba(90,54,32,0.38);
+  }
+  .btn:active{
+    transform: translateY(5px);
+    box-shadow:
+      0 1px 0 var(--walnut-dark),
+      0 4px 8px rgba(90,54,32,0.3);
+  }
+
+  .btn.secondary{
+    background: linear-gradient(180deg, #93A984, var(--sage));
+    box-shadow:
+      0 6px 0 #4f6144,
+      0 10px 18px rgba(76,90,60,0.3);
+  }
+  .btn.secondary:active{
+    box-shadow:
+      0 1px 0 #4f6144,
+      0 4px 8px rgba(76,90,60,0.25);
+  }
+
+  .btn.ghost{
+    background: var(--linen);
+    color: var(--sienna);
+    box-shadow:
+      0 6px 0 #d8c3a5,
+      0 10px 16px rgba(90,54,32,0.15);
+  }
+  .btn.ghost:active{
+    box-shadow:
+      0 1px 0 #d8c3a5,
+      0 3px 6px rgba(90,54,32,0.12);
+  }
+
+  /* gentle floating icon buttons */
+  .icon-row{ display:flex; gap:14px; }
+  .icon-btn{
+    width:52px; height:52px;
+    border-radius:16px;
+    border:none;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem;
+    background: var(--candle);
+    box-shadow: 0 4px 0 rgba(61,43,34,0.15), 0 8px 14px rgba(61,43,34,0.12);
+    cursor:pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    animation: bob 3.2s ease-in-out infinite;
+  }
+  .icon-btn:nth-child(2){ animation-delay: 0.4s; }
+  .icon-btn:nth-child(3){ animation-delay: 0.8s; }
+  .icon-btn:active{ transform: translateY(4px); box-shadow: 0 1px 0 rgba(61,43,34,0.15), 0 3px 6px rgba(61,43,34,0.1); }
+
+  @keyframes bob{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-4px); }
+  }
+
+  footer{ font-size:0.8rem; color:#9a8570; }
+
+  /* --- Section label --- */
+  .section-label{
+    font-family:'Fraunces', serif;
+    font-size:1.1rem;
+    font-weight:600;
+    color: var(--sienna);
+    margin:0 0 -30px;
+    text-align:center;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap:20px;
+    max-width:720px;
+    width:100%;
+  }
+  .mini-card{
+    background: var(--candle);
+    border-radius:18px;
+    padding:22px 24px;
+    box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(122,75,48,0.07);
+    text-align:left;
+  }
+  .mini-card label{
+    display:block;
+    font-size:0.8rem;
+    font-weight:700;
+    color:#8a6f56;
+    margin-bottom:10px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+  }
+
+  /* --- Text input (carved-in feel) --- */
+  .input{
+    width:100%;
+    font-family:'Nunito Sans', sans-serif;
+    font-size:0.95rem;
+    padding:12px 14px;
+    border-radius:12px;
+    border:none;
+    background: var(--linen);
+    color: var(--coffee);
+    box-shadow: inset 0 2px 5px rgba(61,43,34,0.18), inset 0 -1px 0 rgba(255,255,255,0.5);
+    outline:none;
+    transition: box-shadow 0.15s ease;
+  }
+  .input:focus{
+    box-shadow: inset 0 2px 5px rgba(61,43,34,0.18), 0 0 0 3px rgba(224,145,63,0.35);
+  }
+  .input::placeholder{ color:#b3a08c; }
+
+  /* --- Toggle switch --- */
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; }
+  .toggle-text{ font-size:0.92rem; color:#5c4a3a; }
+  .toggle{
+    width:52px; height:30px;
+    border-radius:999px;
+    background: #d9c7ad;
+    box-shadow: inset 0 2px 4px rgba(61,43,34,0.25);
+    position:relative;
+    cursor:pointer;
+    border:none;
+    transition: background 0.2s ease;
+    flex-shrink:0;
+  }
+  .toggle::before{
+    content:"";
+    position:absolute;
+    top:3px; left:3px;
+    width:24px; height:24px;
+    border-radius:50%;
+    background: var(--candle);
+    box-shadow: 0 2px 4px rgba(61,43,34,0.3);
+    transition: transform 0.2s ease;
+  }
+  .toggle.on{ background: var(--sage); }
+  .toggle.on::before{ transform: translateX(22px); }
+
+  /* --- Checkbox --- */
+  .check-item{
+    display:flex; align-items:center; gap:12px;
+    font-size:0.92rem;
+    color:#5c4a3a;
+    margin-bottom:12px;
+    cursor:pointer;
+  }
+  .check-item:last-child{ margin-bottom:0; }
+  .check-box{
+    width:22px; height:22px;
+    border-radius:7px;
+    background: var(--linen);
+    box-shadow: inset 0 2px 4px rgba(61,43,34,0.2);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+    transition: background 0.15s ease;
+  }
+  .check-item.checked .check-box{
+    background: var(--honey);
+    box-shadow: 0 2px 4px rgba(90,54,32,0.3);
+    color: white;
+    font-size:0.75rem;
+  }
+
+  /* --- Badges --- */
+  .badge-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .badge{
+    font-size:0.78rem;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:999px;
+    background: rgba(224,145,63,0.18);
+    color: var(--sienna);
+  }
+  .badge.sage{ background: rgba(124,146,112,0.2); color:#4f6144; }
+  .badge.coffee{ background: rgba(61,43,34,0.1); color: var(--coffee); }
+
+  /* --- Progress bar --- */
+  .progress-track{
+    height:14px;
+    border-radius:999px;
+    background: var(--linen);
+    box-shadow: inset 0 2px 4px rgba(61,43,34,0.2);
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    width:68%;
+    border-radius:999px;
+    background: linear-gradient(90deg, var(--honey), var(--sienna));
+    box-shadow: 0 0 8px rgba(224,145,63,0.6);
+  }
+  .progress-caption{
+    font-size:0.78rem;
+    color:#8a6f56;
+    margin-top:8px;
+  }
+
+  /* --- Tabs --- */
+  .tabs{
+    display:flex;
+    background: var(--linen);
+    border-radius:14px;
+    padding:5px;
+    box-shadow: inset 0 2px 4px rgba(61,43,34,0.15);
+  }
+  .tab{
+    flex:1;
+    text-align:center;
+    padding:9px 0;
+    font-size:0.85rem;
+    font-weight:700;
+    border-radius:10px;
+    color:#8a6f56;
+    cursor:pointer;
+    transition: all 0.15s ease;
+  }
+  .tab.active{
+    background: var(--candle);
+    color: var(--sienna);
+    box-shadow: 0 3px 6px rgba(61,43,34,0.15);
+  }
+
+  /* --- Event card --- */
+  .event-card{
+    background: var(--candle);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow: var(--shadow-soft);
+    text-align:left;
+  }
+  .event-banner{
+    height:120px;
+    background: linear-gradient(135deg, var(--honey), var(--sienna));
+    position:relative;
+  }
+  .event-banner .date-chip{
+    position:absolute;
+    top:12px; left:12px;
+    background: var(--candle);
+    color: var(--coffee);
+    font-weight:800;
+    font-size:0.75rem;
+    padding:6px 10px;
+    border-radius:10px;
+    box-shadow: 0 3px 6px rgba(61,43,34,0.2);
+  }
+  .event-body{ padding:18px 20px; }
+  .event-body h3{
+    font-family:'Fraunces', serif;
+    margin:0 0 4px;
+    font-size:1.15rem;
+  }
+  .event-meta{ font-size:0.82rem; color:#8a6f56; margin:0 0 14px; }
+
+  /* --- Ticket tier cards (side by side) --- */
+  .tier-grid{
+    display:flex;
+    gap:18px;
+    max-width:720px;
+    width:100%;
+    flex-wrap:wrap;
+  }
+  .tier-card{
+    flex:1;
+    min-width:220px;
+    background: var(--candle);
+    border-radius:20px;
+    padding:22px 22px 20px;
+    box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(122,75,48,0.07);
+    text-align:left;
+    display:flex;
+    flex-direction:column;
+  }
+  .tier-card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:4px;
+  }
+  .tier-card-head .name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:1.05rem;
+  }
+  .tier-card-head .price{
+    font-weight:800;
+    color: var(--sienna);
+    font-size:1rem;
+  }
+  .tier-tagline{ font-size:0.78rem; color:#8a6f56; margin:0 0 16px; }
+  .benefits{
+    list-style:none;
+    margin:0 0 18px;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    flex:1;
+  }
+  .benefits li{
+    font-size:0.85rem;
+    color:#5c4a3a;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .benefits li::before{
+    content:"✓";
+    color: var(--sage);
+    font-weight:800;
+    flex-shrink:0;
+  }
+  /* --- Ticket selection (button first, then quantity stepper) --- */
+  .ticket-select{ margin-top:6px; }
+  .add-ticket{
+    width:100%;
+    padding:12px 18px;
+    font-size:0.85rem;
+  }
+  .stepper{
+    display:flex; align-items:center; justify-content:space-between;
+    width:100%;
+    gap:10px;
+    background: var(--candle);
+    border-radius:12px;
+    padding:8px 12px;
+    box-shadow: inset 0 1px 3px rgba(61,43,34,0.15);
+  }
+  .stepper .qty{
+    font-weight:800;
+    min-width:20px;
+    text-align:center;
+    font-size:1rem;
+    transition: transform 0.15s ease;
+  }
+  .stepper .qty.bump{ animation: qtyBump 0.25s ease; }
+  @keyframes qtyBump{
+    0%{ transform: scale(1); }
+    45%{ transform: scale(1.35); color: var(--sienna); }
+    100%{ transform: scale(1); }
+  }
+  .step-btn{
+    width:26px; height:26px;
+    border-radius:7px;
+    border:none;
+    background: var(--sienna);
+    color: var(--candle);
+    font-weight:800;
+    cursor:pointer;
+    box-shadow: 0 2px 0 var(--walnut-dark);
+    transition: transform 0.1s ease;
+  }
+  .step-btn:active{ transform: translateY(2px); box-shadow:none; }
+  .step-btn.minus{ background:#93A984; box-shadow:0 2px 0 #4f6144; }
+
+  /* --- Floating cart bar --- */
+  .cart-bar{
+    position:fixed;
+    left:50%;
+    bottom:-120px;
+    transform: translateX(-50%);
+    background: var(--coffee);
+    color: var(--candle);
+    border-radius:18px;
+    padding:14px 24px;
+    box-shadow: 0 12px 30px rgba(61,43,34,0.4);
+    display:flex;
+    align-items:center;
+    gap:20px;
+    z-index:50;
+    transition: bottom 0.3s ease;
+    max-width:90vw;
+    flex-wrap:wrap;
+  }
+  .cart-bar.visible{ bottom:24px; }
+  .cart-bar .cart-info{ display:flex; flex-direction:column; }
+  .cart-bar .cart-count{ font-weight:800; font-size:0.9rem; }
+  .cart-bar .cart-breakdown{ font-size:0.72rem; opacity:0.75; margin-top:2px; }
+  .cart-bar .cart-total{ font-weight:800; font-size:1.1rem; color: var(--honey); }
+  .cart-bar .btn{ padding:10px 20px; font-size:0.82rem; }
+
+  /* --- QR ticket pass --- */
+  .pass{
+    background: var(--candle);
+    border-radius:20px;
+    box-shadow: var(--shadow-soft);
+    overflow:hidden;
+    text-align:left;
+  }
+  .pass-top{
+    background: linear-gradient(135deg, var(--sienna), var(--walnut));
+    color: var(--candle);
+    padding:18px 20px;
+  }
+  .pass-top .ev{ font-family:'Fraunces', serif; font-size:1.1rem; margin:0 0 2px; }
+  .pass-top .tt{ font-size:0.78rem; opacity:0.85; }
+  .pass-perf{
+    height:0;
+    border-top:2px dashed rgba(61,43,34,0.2);
+    position:relative;
+  }
+  .pass-perf::before, .pass-perf::after{
+    content:"";
+    position:absolute; top:-9px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background: var(--linen);
+  }
+  .pass-perf::before{ left:-9px; }
+  .pass-perf::after{ right:-9px; }
+  .pass-bottom{
+    padding:22px 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:12px;
+  }
+  .qr-box{
+    width:88px; height:88px;
+    border-radius:10px;
+    background:
+      repeating-linear-gradient(45deg, var(--coffee) 0 3px, transparent 3px 6px),
+      repeating-linear-gradient(-45deg, var(--coffee) 0 3px, transparent 3px 6px);
+    background-blend-mode: multiply;
+    background-color: var(--candle);
+    flex-shrink:0;
+  }
+  .pass-holder .who{ font-weight:800; font-size:0.9rem; }
+  .pass-holder .code{ font-size:0.72rem; color:#8a6f56; font-family: monospace; margin-top:2px; }
+  .pass-top.normal{ background: linear-gradient(135deg, var(--sage), #5d7550); }
+
+  /* --- Scan result states --- */
+  .scan-result{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px;
+    border-radius:14px;
+    margin-bottom:10px;
+    font-size:0.88rem;
+    font-weight:700;
+  }
+  .scan-result:last-child{ margin-bottom:0; }
+  .scan-icon{
+    width:32px; height:32px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--candle);
+    flex-shrink:0;
+    font-size:0.9rem;
+  }
+  .scan-result.valid{ background: rgba(124,146,112,0.18); color:#4f6144; }
+  .scan-result.valid .scan-icon{ background: var(--sage); }
+  .scan-result.duplicate{ background: rgba(224,145,63,0.18); color: var(--sienna); }
+  .scan-result.duplicate .scan-icon{ background: var(--honey); }
+  .scan-result.invalid{ background: rgba(168,60,40,0.14); color:#8a3c28; }
+  .scan-result.invalid .scan-icon{ background:#B5432E; }
+
+  /* --- Capacity meter --- */
+  .capacity-label{ display:flex; justify-content:space-between; font-size:0.8rem; color:#8a6f56; margin-bottom:8px; }
+  .capacity-track{
+    height:10px;
+    border-radius:999px;
+    background: var(--linen);
+    box-shadow: inset 0 2px 4px rgba(61,43,34,0.18);
+    overflow:hidden;
+  }
+  .capacity-fill{
+    height:100%;
+    background: linear-gradient(90deg, var(--sage), #5d7550);
+    border-radius:999px;
+  }
+  /* --- Page structure cards --- */
+  .page-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap:20px;
+    max-width:720px;
+    width:100%;
+  }
+  .page-card{
+    background: var(--candle);
+    border-radius:18px;
+    padding:22px 24px;
+    box-shadow: var(--shadow-soft), inset 0 0 0 1px rgba(122,75,48,0.07);
+    text-align:left;
+  }
+  .page-card .page-role{
+    display:inline-block;
+    font-size:0.68rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    padding:4px 10px;
+    border-radius:999px;
+    margin-bottom:12px;
+    background: rgba(224,145,63,0.18);
+    color: var(--sienna);
+  }
+  .page-card .page-role.organizer{ background: rgba(124,146,112,0.2); color:#4f6144; }
+  .page-card .page-role.scanner{ background: rgba(168,60,40,0.14); color:#8a3c28; }
+  .page-card .page-role.public{ background: rgba(61,43,34,0.1); color: var(--coffee); }
+  .page-card h3{
+    font-family:'Fraunces', serif;
+    font-size:1.05rem;
+    margin:0 0 4px;
+  }
+  .page-card .page-route{
+    display:block;
+    font-family: monospace;
+    font-size:0.74rem;
+    color:#8a6f56;
+    margin-bottom:10px;
+  }
+  .page-card p{
+    font-size:0.85rem;
+    color:#5c4a3a;
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .page-card .page-uses{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .page-card .page-uses span{
+    font-size:0.72rem;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:999px;
+    background: var(--linen);
+    color:#8a6f56;
+  }
+</style>
+</head>
+<body>
+
+  <div>
+    <h1>A theme that feels like <span>home</span></h1>
+    <p class="subtitle">Warm linen backgrounds, toasted honey accents, and buttons with real weight — they sink when pressed, like a good armchair.</p>
+  </div>
+
+  <div class="palette">
+    <div class="swatch"><div class="chip" style="background:#3D2B22"></div>Coffee<br>#3D2B22</div>
+    <div class="swatch"><div class="chip" style="background:#F6E9D8"></div>Linen<br>#F6E9D8</div>
+    <div class="swatch"><div class="chip" style="background:#E0913F"></div>Honey<br>#E0913F</div>
+    <div class="swatch"><div class="chip" style="background:#A85C2E"></div>Sienna<br>#A85C2E</div>
+    <div class="swatch"><div class="chip" style="background:#7C9270"></div>Sage<br>#7C9270</div>
+    <div class="swatch"><div class="chip" style="background:#FFF8EE;border:1px solid #eee"></div>Candle<br>#FFF8EE</div>
+  </div>
+
+  <div class="card">
+    <h2>Evening reading list</h2>
+    <p>3 books saved · press a button and feel it click into place.</p>
+    <div class="btn-row">
+      <button type="button" class="btn">Continue reading</button>
+      <button type="button" class="btn secondary">Mark done</button>
+      <button type="button" class="btn ghost">Later</button>
+    </div>
+  </div>
+
+  <div class="icon-row">
+    <button type="button" class="icon-btn" aria-label="Coffee">☕</button>
+    <button type="button" class="icon-btn" aria-label="Candlelight">🕯️</button>
+    <button type="button" class="icon-btn" aria-label="Reading">📖</button>
+  </div>
+
+  <p class="section-label">More components</p>
+
+  <div class="grid">
+
+    <div class="mini-card">
+      <label>Text input</label>
+      <input class="input" type="text" placeholder="What's on your mind tonight?">
+    </div>
+
+    <div class="mini-card">
+      <label>Toggle</label>
+      <div class="toggle-row">
+        <span class="toggle-text">Fireplace ambience</span>
+        <button type="button" class="toggle on" role="switch" aria-checked="true" aria-label="Fireplace ambience" onclick="this.classList.toggle('on'); this.setAttribute('aria-checked', this.classList.contains('on'))"></button>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <label>Checklist</label>
+      <div class="check-item checked" role="checkbox" tabindex="0" aria-checked="true" onclick="this.classList.toggle('checked'); this.setAttribute('aria-checked', this.classList.contains('checked'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
+        <span class="check-box">✓</span> Light the candles
+      </div>
+      <div class="check-item" role="checkbox" tabindex="0" aria-checked="false" onclick="this.classList.toggle('checked'); this.setAttribute('aria-checked', this.classList.contains('checked'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
+        <span class="check-box"></span> Brew the tea
+      </div>
+      <div class="check-item" role="checkbox" tabindex="0" aria-checked="false" onclick="this.classList.toggle('checked'); this.setAttribute('aria-checked', this.classList.contains('checked'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault(); this.click();}">
+        <span class="check-box"></span> Pick a book
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <label>Tags</label>
+      <div class="badge-row">
+        <span class="badge">Warm</span>
+        <span class="badge sage">Slow living</span>
+        <span class="badge coffee">Evening</span>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <label>Progress</label>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <p class="progress-caption">Tea steeping · 68%</p>
+    </div>
+
+    <div class="mini-card">
+      <label>Tabs</label>
+      <div class="tabs">
+        <div class="tab active">Cozy</div>
+        <div class="tab">Bright</div>
+        <div class="tab">Night</div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="section-label">For your ticketing app</p>
+
+  <div class="grid">
+
+    <div class="event-card">
+      <div class="event-banner">
+        <span class="date-chip">OCT 12</span>
+      </div>
+      <div class="event-body">
+        <h3>Rooftop Jazz Night</h3>
+        <p class="event-meta">The Attic Loft · 8:00 PM</p>
+        <button type="button" class="btn" style="width:100%;">View event</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tier-grid">
+
+    <div class="tier-card" data-tier="general" data-name="General" data-price="40">
+      <div class="tier-card-head">
+        <span class="name">General</span>
+        <span class="price">$40</span>
+      </div>
+      <p class="tier-tagline">Standard entry</p>
+      <ul class="benefits">
+        <li>Access to main floor</li>
+        <li>Standing room</li>
+        <li>Cash bar access</li>
+      </ul>
+      <div class="ticket-select">
+        <button type="button" class="btn add-ticket">Select tickets</button>
+        <div class="stepper" hidden>
+          <button type="button" class="step-btn minus" aria-label="Remove one General ticket">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="step-btn plus" aria-label="Add one General ticket">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tier-card" data-tier="early-bird" data-name="Early Bird" data-price="28">
+      <div class="tier-card-head">
+        <span class="name">Early Bird</span>
+        <span class="price">$28</span>
+      </div>
+      <p class="tier-tagline">Limited quantity, same access as General</p>
+      <ul class="benefits">
+        <li>Access to main floor</li>
+        <li>Standing room</li>
+        <li>Discounted price, first 50 tickets only</li>
+      </ul>
+      <div class="ticket-select">
+        <button type="button" class="btn add-ticket">Select tickets</button>
+        <div class="stepper" hidden>
+          <button type="button" class="step-btn minus" aria-label="Remove one Early Bird ticket">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="step-btn plus" aria-label="Add one Early Bird ticket">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grid">
+
+    <div class="pass">
+      <div class="pass-top">
+        <p class="ev">Rooftop Jazz Night</p>
+        <p class="tt">VIP Admission</p>
+      </div>
+      <div class="pass-perf"></div>
+      <div class="pass-bottom">
+        <div class="qr-box"></div>
+        <div class="pass-holder">
+          <div class="who">Maya Fernandes</div>
+          <div class="code">TCK-8F2A91C0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pass">
+      <div class="pass-top normal">
+        <p class="ev">Rooftop Jazz Night</p>
+        <p class="tt">General Admission</p>
+      </div>
+      <div class="pass-perf"></div>
+      <div class="pass-bottom">
+        <div class="qr-box"></div>
+        <div class="pass-holder">
+          <div class="who">Arjun Mehta</div>
+          <div class="code">TCK-3B71D4E2</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mini-card">
+      <label>Check-in scan results</label>
+      <div class="scan-result valid"><span class="scan-icon">✓</span> Checked in — VIP</div>
+      <div class="scan-result valid"><span class="scan-icon">✓</span> Checked in — General</div>
+      <div class="scan-result duplicate"><span class="scan-icon">!</span> Already checked in</div>
+      <div class="scan-result invalid"><span class="scan-icon">×</span> Invalid or refunded</div>
+    </div>
+
+    <div class="mini-card">
+      <label>Venue capacity</label>
+      <div class="capacity-label"><span>Sold</span><span>184 / 220</span></div>
+      <div class="capacity-track"><div class="capacity-fill" style="width:84%"></div></div>
+    </div>
+
+  </div>
+
+  <p class="section-label">Page structure</p>
+
+  <div class="page-grid">
+
+    <div class="page-card">
+      <span class="page-role public">Public</span>
+      <h3>Signup / Login</h3>
+      <span class="page-route">/accounts/signup/ · /accounts/login/</span>
+      <p>Role (Organizer or Attendee) is chosen once at signup, not switched later — a one-time fork, not a live toggle.</p>
+      <div class="page-uses"><span>tabs (role choice)</span><span>input</span><span>btn</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role">Attendee</span>
+      <h3>Dashboard</h3>
+      <span class="page-route">/</span>
+      <p>Public listing of published events — title, date, banner thumbnail. Primary discovery path.</p>
+      <div class="page-uses"><span>event-card grid</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role">Attendee</span>
+      <h3>Event Detail &amp; Purchase</h3>
+      <span class="page-route">/events/&lt;slug&gt;/</span>
+      <p>Reachable from the dashboard or a direct/QR link. Shows event details, ticket tiers to select, and a running cart.</p>
+      <div class="page-uses"><span>event-card</span><span>tier-card</span><span>cart-bar</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role">Attendee</span>
+      <h3>My Tickets</h3>
+      <span class="page-route">/tickets/</span>
+      <p>Purchased or imported tickets as scannable QR passes, one per ticket type held.</p>
+      <div class="page-uses"><span>pass (QR)</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role organizer">Organizer</span>
+      <h3>My Venues</h3>
+      <span class="page-route">/venues/</span>
+      <p>Self-service venue library — name, address, max capacity, and a count of events using each one. Reusable across events.</p>
+      <div class="page-uses"><span>mini-card list</span><span>input</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role organizer">Organizer</span>
+      <h3>Event Editor</h3>
+      <span class="page-route">/events/&lt;slug&gt;/edit/</span>
+      <p>Create/edit an event: venue picker (scoped to the organizer's own venues), capacity constraint, banner image and accent-color "canvas," publish toggle.</p>
+      <div class="page-uses"><span>toggle</span><span>input</span><span>badge</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role organizer">Organizer</span>
+      <h3>Ticket Types &amp; Bulk Import</h3>
+      <span class="page-route">/events/&lt;slug&gt;/tickets/</span>
+      <p>Define ticket tiers with price and quantity; upload a VIP guest-list CSV to issue tickets directly, bypassing checkout.</p>
+      <div class="page-uses"><span>tier-card</span><span>capacity meter</span><span>input</span></div>
+    </div>
+
+    <div class="page-card">
+      <span class="page-role scanner">Check-in scanner</span>
+      <h3>Door Scan</h3>
+      <span class="page-route">/checkin/&lt;scan_token&gt;/</span>
+      <p>No login — the secret link itself is the credential. Optional scanner-name prompt for attribution only. Covers every ticket type, not just VIP.</p>
+      <div class="page-uses"><span>scan-result</span><span>capacity meter</span></div>
+    </div>
+
+  </div>
+
+  <footer>Fraunces for display · Nunito Sans for body · soft bevel shadows for the 3D press</footer>
+
+  <div class="cart-bar" id="cartBar" aria-live="polite">
+    <div class="cart-info">
+      <span class="cart-count" id="cartCount">0 tickets</span>
+      <span class="cart-breakdown" id="cartBreakdown"></span>
+    </div>
+    <span class="cart-total" id="cartTotal">$0</span>
+    <button type="button" class="btn">Go to checkout</button>
+  </div>
+
+  <script>
+    const cart = {};
+
+    function updateCartBar(){
+      const bar = document.getElementById('cartBar');
+      const entries = Object.values(cart).filter(item => item.qty > 0);
+      const totalQty = entries.reduce((sum, item) => sum + item.qty, 0);
+      const totalPrice = entries.reduce((sum, item) => sum + item.qty * item.price, 0);
+
+      bar.classList.toggle('visible', totalQty > 0);
+      document.getElementById('cartCount').textContent =
+        totalQty + (totalQty === 1 ? ' ticket' : ' tickets');
+      document.getElementById('cartTotal').textContent = '$' + totalPrice;
+      document.getElementById('cartBreakdown').textContent =
+        entries.map(item => `${item.qty}× ${item.name}`).join(' · ');
+    }
+
+    function initTierCard(card){
+      const tier = card.dataset.tier;
+      const name = card.dataset.name;
+      const price = parseFloat(card.dataset.price);
+      cart[tier] = { qty: 0, price, name };
+
+      const selectBtn = card.querySelector('.add-ticket');
+      const stepper = card.querySelector('.stepper');
+      const qtyEl = card.querySelector('.qty');
+      const minusBtn = card.querySelector('.minus');
+      const plusBtn = card.querySelector('.plus');
+
+      function refreshQty(){
+        qtyEl.textContent = cart[tier].qty;
+        qtyEl.classList.remove('bump');
+        void qtyEl.offsetWidth; // restart the pulse animation
+        qtyEl.classList.add('bump');
+        updateCartBar();
+      }
+
+      selectBtn.addEventListener('click', () => {
+        cart[tier].qty = 1;
+        selectBtn.hidden = true;
+        stepper.hidden = false;
+        refreshQty();
+      });
+
+      plusBtn.addEventListener('click', () => {
+        cart[tier].qty += 1;
+        refreshQty();
+      });
+
+      minusBtn.addEventListener('click', () => {
+        cart[tier].qty = Math.max(0, cart[tier].qty - 1);
+        if (cart[tier].qty === 0){
+          stepper.hidden = true;
+          selectBtn.hidden = false;
+        }
+        refreshQty();
+      });
+    }
+
+    document.querySelectorAll('.tier-card').forEach(initTierCard);
+  </script>
+
+</body>
+</html>

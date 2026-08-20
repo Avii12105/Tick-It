@@ -216,7 +216,7 @@ class CartFlowTests(TestCase):
             reverse("events:public_event_detail", args=[self.event.pk])
         )
         self.assertContains(response, "GA")
-        self.assertContains(response, "Add to cart")
+        self.assertContains(response, "Sign up to reserve")
 
     def test_tier_over_capacity_form_rejected(self):
         TicketType.objects.create(

@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TickIt{% endblock %}</title>
-    <link rel="stylesheet" href="{{ static('css/styles.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}TickIt{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="{{ static('css/styles.css') }}">
+  {% block extra_head %}{% endblock %}
 </head>
-<body>
-    {% include "base/nav.html" %}
-    <main class="container">
-        {% for message in messages %}
+<body class="page-body">
+  {% include "base/nav.html" %}
+  <main class="site-main">
+    {% block full_width %}{% endblock %}
+    <div class="{% block container_class %}container{% endblock %}">
+      {% if messages %}
+        <div class="alerts">
+          {% for message in messages %}
             <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-        {% block content %}{% endblock %}
-    </main>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+  <footer class="site-footer">
+    <span>TickIt &mdash; Event Ticketing Platform</span>
+    <span>Built with Django</span>
+  </footer>
 </body>
 </html>

@@ -3,18 +3,58 @@
 {% block title %}{{ title }} · TickIt{% endblock %}
 
 {% block content %}
-    <h1>{{ title }}</h1>
-    {% if form.non_field_errors() %}
-        <div class="alert alert-error">{{ form.non_field_errors() }}</div>
-    {% endif %}
-    <p class="muted">
-        Event capacity: {{ event.allocated_capacity }} ·
-        Allocated across tiers so far: {{ used_capacity }}
-    </p>
-    <form method="post" class="form">
+  <nav class="breadcrumb">
+    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <a href="{{ url('events:organizer_event_detail', event.pk) }}">{{ event.name }}</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__current">{{ title }}</span>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-header__eyebrow">{{ event.name }}</p>
+    <h1 class="page-header__title">{{ title }}</h1>
+  </div>
+
+  {%- set remaining = event.allocated_capacity - used_capacity -%}
+  <div class="stat-row" style="max-width:520px;margin-bottom:1.5rem;">
+    <div class="stat-card stat-card--violet">
+      <p class="stat-card__label">Event capacity</p>
+      <p class="stat-card__value">{{ event.allocated_capacity }}</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Allocated</p>
+      <p class="stat-card__value">{{ used_capacity }}</p>
+    </div>
+    <div class="stat-card{% if remaining == 0 %} stat-card--red{% else %} stat-card--sage{% endif %}">
+      <p class="stat-card__label">Remaining</p>
+      <p class="stat-card__value">{{ remaining }}</p>
+    </div>
+  </div>
+
+  <div class="form-shell">
+    <div class="form-wrap">
+      {% if form.non_field_errors() %}
+        <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+      {% endif %}
+      <form method="post">
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         {{ form.as_p() }}
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-secondary">Cancel</a>
-    </form>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Save tier</button>
+          <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-ghost">Cancel</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="form-hint">
+      <p class="form-hint__title">Tips</p>
+      <ul style="padding:0;margin:0;">
+        <li>Quantity total across all tiers cannot exceed the event's allocated capacity.</li>
+        <li>You cannot shrink a tier below what's already sold or reserved.</li>
+        <li>Use tier names like <em>General</em>, <em>VIP</em>, or <em>Early Bird</em>.</li>
+        <li>Price is in ₹ — set 0 for free tiers.</li>
+      </ul>
+    </aside>
+  </div>
 {% endblock %}

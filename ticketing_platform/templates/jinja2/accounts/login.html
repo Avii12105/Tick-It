@@ -1,16 +1,38 @@
 {% extends "base/layout.html" %}
 
 {% block title %}Login · TickIt{% endblock %}
+{% block container_class %}{% endblock %}
 
 {% block content %}
-    <h1>Login</h1>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5V9Z" stroke="var(--indigo)" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M15 7v10" stroke="var(--indigo)" stroke-width="1.8" stroke-dasharray="2 2.5" stroke-linecap="round"/>
+      </svg>
+      TickIt
+    </div>
+
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in to continue to your tickets and events.</p>
+
     {% if form.non_field_errors() %}
-        <div class="alert alert-error">{{ form.non_field_errors() }}</div>
+      <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
     {% endif %}
-    <form method="post" class="form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <input type="hidden" name="next" value="{{ next or '' }}">
-        {{ form.as_p() }}
-        <button type="submit" class="btn btn-primary">Login</button>
+
+    <form method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      <input type="hidden" name="next" value="{{ next or '' }}">
+      {{ form.as_p() }}
+      <div class="form-actions" style="margin-top:1.5rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;">Sign in</button>
+      </div>
     </form>
+
+    <div class="auth-footer">
+      Don't have an account? <a href="{{ url('accounts:signup') }}">Sign up free</a>
+    </div>
+  </div>
+</div>
 {% endblock %}

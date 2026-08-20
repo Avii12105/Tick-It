@@ -3,56 +3,106 @@
 {% block title %}{{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <div class="row">
-        <h1>{{ event.name }}</h1>
-        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">Back to events</a>
-    </div>
-    <p class="muted">
-        {{ event.date.strftime('%b %d, %Y %I:%M %p') }} · {{ event.venue.name }}
-    </p>
-    <div class="card">
-        <p>
-            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
-            Allocated capacity: {{ used_capacity }} / {{ event.allocated_capacity }}
-            (venue max {{ event.venue.max_capacity }})
-        </p>
-        <p>{{ event.description }}</p>
-        <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit event</a>
-    </div>
+  <nav class="breadcrumb">
+    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__current">{{ event.name }}</span>
+  </nav>
 
-    <div class="row">
-        <h2>Ticket tiers</h2>
-        <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary">+ Add tier</a>
+  <div class="page-header-row">
+    <div class="page-header">
+      <p class="page-header__eyebrow">{{ event.venue.name }}</p>
+      <h1 class="page-header__title">{{ event.name }}</h1>
+      <p class="page-header__sub">{{ event.date.strftime('%A, %B %d, %Y · %I:%M %p') }}</p>
     </div>
-    {% if ticket_types %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Allocated</th>
-                    <th>Sold</th>
-                    <th>Available</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tt in ticket_types %}
-                    <tr>
-                        <td>{{ tt.name }}</td>
-                        <td>₹{{ tt.price }}</td>
-                        <td>{{ tt.quantity_total }}</td>
-                        <td>{{ tt.quantity_sold }}</td>
-                        <td>{{ tt.available_count() }}</td>
-                        <td>
-                            <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-secondary">Edit</a>
-                            <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="muted">No ticket tiers yet. Add one to start selling.</p>
-    {% endif %}
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start;">
+      <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit event</a>
+      <a href="{{ url('events:organizer_event_list') }}" class="btn btn-ghost">← Back</a>
+    </div>
+  </div>
+
+  {# Stats #}
+  {%- set pct = ((used_capacity / event.allocated_capacity) * 100) | int if event.allocated_capacity > 0 else 0 -%}
+  <div class="stat-row" style="margin-bottom:1.5rem;">
+    <div class="stat-card">
+      <p class="stat-card__label">Status</p>
+      <p class="stat-card__value" style="font-size:1rem;margin-top:4px;">
+        <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+      </p>
+    </div>
+    <div class="stat-card stat-card--violet">
+      <p class="stat-card__label">Tiers allocated</p>
+      <p class="stat-card__value">{{ used_capacity }}</p>
+      <p class="stat-card__sub">of {{ event.allocated_capacity }} total</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-card__label">Venue capacity</p>
+      <p class="stat-card__value">{{ event.venue.max_capacity }}</p>
+    </div>
+    <div class="stat-card{% if pct >= 90 %} stat-card--red{% elif pct >= 65 %} stat-card--amber{% else %} stat-card--green{% endif %}">
+      <p class="stat-card__label">Capacity used</p>
+      <p class="stat-card__value">{{ pct }}%</p>
+      <div class="capacity-bar" style="width:100%;margin-top:6px;">
+        <div class="capacity-bar__fill{% if pct >= 90 %} capacity-bar__fill--full{% elif pct >= 65 %} capacity-bar__fill--warn{% endif %}" style="width:{{ pct }}%;"></div>
+      </div>
+    </div>
+  </div>
+
+  {% if event.description %}
+    <div class="panel mb-3">
+      <p class="section-title" style="margin-bottom:.6rem;">Description</p>
+      <p style="font-size:.875rem;color:var(--text-3);margin:0;line-height:1.7;">{{ event.description }}</p>
+    </div>
+  {% endif %}
+
+  {# Ticket tiers #}
+  <div class="section-header mt-2">
+    <h2 class="section-title">Ticket Tiers</h2>
+    <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary btn-sm">+ Add tier</a>
+  </div>
+
+  {% if ticket_types %}
+    <div class="ledger-wrap">
+      <table class="ledger">
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Price</th>
+            <th>Allocated</th>
+            <th>Sold</th>
+            <th>Available</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tt in ticket_types %}
+            {% set avail = tt.available_count() %}
+            <tr>
+              <td style="font-weight:600;">{{ tt.name }}</td>
+              <td class="mono">₹{{ tt.price }}</td>
+              <td class="mono">{{ tt.quantity_total }}</td>
+              <td class="mono">{{ tt.quantity_sold }}</td>
+              <td class="mono">
+                {% if avail > 0 %}<span style="color:var(--ok);">{{ avail }}</span>
+                {% else %}<span style="color:var(--indigo);">0</span>{% endif %}
+              </td>
+              <td>
+                <div class="ledger__actions">
+                  <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-secondary btn-sm">Edit</a>
+                  <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state" style="padding:2rem 0;">
+      <div class="empty-state__icon">🎫</div>
+      <p class="empty-state__title">No ticket tiers yet</p>
+      <p class="empty-state__text">Add tiers to define pricing and availability.</p>
+      <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary btn-sm">+ Add first tier</a>
+    </div>
+  {% endif %}
 {% endblock %}

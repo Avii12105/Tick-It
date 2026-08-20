@@ -3,14 +3,31 @@
 {% block title %}Delete {{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
-    <h1>Delete Event</h1>
+  <nav class="breadcrumb">
+    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <a href="{{ url('events:organizer_event_detail', event.pk) }}">{{ event.name }}</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__current">Delete</span>
+  </nav>
+
+  <div class="page-header">
+    <p class="page-header__eyebrow">Back office</p>
+    <h1 class="page-header__title">Delete Event</h1>
+  </div>
+
+  <div class="danger-panel">
     <p>
-        Are you sure you want to delete <strong>{{ event.name }}</strong>?
-        This cannot be undone.
+      You are about to permanently delete <strong style="color:var(--text-1);">{{ event.name }}</strong>
+      scheduled for {{ event.date.strftime('%b %d, %Y') }} at {{ event.venue.name }}.
+      All ticket tiers will be removed. This cannot be undone.
     </p>
-    <form method="post" class="form">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-        <button type="submit" class="btn btn-danger">Delete</button>
+    <form method="post">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      <div class="form-actions">
+        <button type="submit" class="btn btn-danger">Delete event</button>
         <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">Cancel</a>
+      </div>
     </form>
+  </div>
 {% endblock %}

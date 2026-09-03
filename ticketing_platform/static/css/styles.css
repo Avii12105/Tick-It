@@ -648,6 +648,16 @@ code,pre{font-family:var(--font-mono)}
 .capacity-bar__fill--warn{background:linear-gradient(90deg,#D4A000,var(--warn))}
 .capacity-bar__fill--full{background:linear-gradient(90deg,#C44,var(--danger))}
 
+/* ---- Check-in panel ------------------------------------------------- */
+.checkin-panel{
+  background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--border-soft);
+  padding:20px 24px;box-shadow:var(--shadow-sm);
+}
+.checkin-panel .section-header{margin-bottom:.75rem}
+.checkin-panel__description{font-size:.85rem;color:var(--text-3);font-weight:600;margin:0 0 .85rem}
+.checkin-panel__actions{display:flex;gap:.5rem;flex-wrap:wrap}
+
 /* ---- Danger panel ---------------------------------------------------- */
 .danger-panel{
   background:var(--surface);border-radius:var(--radius);

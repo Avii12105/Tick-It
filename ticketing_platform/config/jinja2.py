@@ -5,6 +5,10 @@ from django.contrib import messages as django_messages
 from jinja2 import Environment
 
 
+def csrf_token():
+    return get_token
+
+
 def url(viewname, *args, **kwargs):
     return reverse(viewname, args=args, kwargs=kwargs)
 

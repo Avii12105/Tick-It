@@ -68,4 +68,9 @@ urlpatterns = [
         views.event_delete,
         name="event_delete",
     ),
+    path(
+        "organizer/events/<int:pk>/bulk_import/",
+        views.BulkImportView.as_view(),
+        name="event_bulk_import",
+    ),
 ]

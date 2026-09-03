@@ -158,6 +158,54 @@ def event_delete(request, pk):
     return render(request, "events/event_confirm_delete.html", {"event": event})
 
 
+# V5: Bulk Import
+
+from django.views.generic.edit import FormView
+from django.urls import reverse, reverse_lazy
+
+from .forms import BulkImportForm
+from .models import Event, WaitlistEntry
+
+
+class BulkImportView(FormView):
+    template_name = "events/bulk_import.html"
+    form_class = BulkImportForm
+
+    def dispatch(self, request, *args, **kwargs):
+        self.event = get_object_or_404(
+            Event, pk=kwargs["pk"], organizer=request.user
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse("events:organizer_event_detail", kwargs={"pk": self.event.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["initial"] = {"event_pk": self.event.pk}
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        kwargs = super().get_context_data(**kwargs)
+        kwargs["event"] = self.event
+        return kwargs
+
+    def form_valid(self, form):
+        csv_file = form.cleaned_data["csv_file"]
+        csv_content = csv_file.read().decode("utf-8")
+        from .tasks import process_bulk_import
+
+        results = process_bulk_import(self.event.pk, csv_content)
+
+        messages.success(
+            self.request,
+            f"Bulk import complete: {results['allocated']} tickets allocated, "
+            f"{results['waitlisted']} added to waitlist, "
+            f"{len(results['errors'])} errors.",
+        )
+        return super().form_valid(form)
+
+
 # --- V4: Event Check-In ---
 
 

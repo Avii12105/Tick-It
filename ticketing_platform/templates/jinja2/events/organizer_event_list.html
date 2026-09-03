@@ -8,7 +8,9 @@
       <p class="page-header__eyebrow">Back office</p>
       <h1 class="page-header__title">My Events</h1>
     </div>
-    <a href="{{ url('events:event_create') }}" class="btn btn-primary">+ New Event</a>
+    {% if events %}
+      <a href="{{ url('events:event_create') }}" class="btn btn-primary">+ New Event</a>
+    {% endif %}
   </div>
 
   {% if events %}

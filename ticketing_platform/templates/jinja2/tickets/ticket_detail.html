@@ -14,14 +14,17 @@
     <h1 class="page-header__title">Your Ticket</h1>
   </div>
 
+  <div id="checkin-live-alert" style="display:{% if ticket.checked_in_at or ticket.status == 'checked_in' %}flex{% else %}none{% endif %}; align-items:center; gap:10px; background:var(--ok-bg); color:var(--ok); border:1px solid rgba(26,107,58,0.25); border-radius:var(--radius-sm); padding:12px 18px; margin-bottom:1.5rem; font-size:.875rem; font-weight:700;">
+    <span style="font-size:1.15rem;line-height:1;">✓</span>
+    <span id="checkin-live-text">This ticket has been checked in for entry.</span>
+  </div>
+
   <div class="pass-layout" style="margin-bottom:2rem;">
     <div class="pass-layout__divider" aria-hidden="true"></div>
 
-    {% if ticket.status == 'valid' %}
-      <span class="pass-stamp pass-stamp--valid" aria-hidden="true">Valid</span>
-    {% elif ticket.status == 'checked_in' %}
-      <span class="pass-stamp pass-stamp--checkedin" aria-hidden="true">Checked in</span>
-    {% endif %}
+    <span id="pass-stamp" class="pass-stamp {% if ticket.checked_in_at or ticket.status == 'checked_in' %}pass-stamp--checkedin{% else %}pass-stamp--valid{% endif %}" aria-hidden="true">
+      {% if ticket.checked_in_at or ticket.status == 'checked_in' %}Checked in{% else %}Valid{% endif %}
+    </span>
 
     <div class="pass-layout__info">
       <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--indigo);margin:0 0 4px;">
@@ -46,7 +49,15 @@
       <div style="border-top:1px solid rgba(61,43,34,0.1);padding-top:12px;display:flex;gap:1.5rem;flex-wrap:wrap;">
         <div>
           <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Status</p>
-          <span class="badge badge-{{ ticket.status }}">{{ ticket.get_status_display() }}</span>
+          <span id="ticket-status-badge" class="badge badge-{{ 'checked_in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.status }}">
+            {{ 'Checked in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.get_status_display() }}
+          </span>
+        </div>
+        <div id="checked-in-time-container" style="{% if not ticket.checked_in_at %}display:none;{% endif %}">
+          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Checked In</p>
+          <p id="checked-in-time" style="font-size:.82rem;font-weight:700;color:var(--ok);margin:0;">
+            {{ ticket.checked_in_at.strftime('%b %d, %Y · %I:%M %p') if ticket.checked_in_at else '' }}
+          </p>
         </div>
         <div>
           <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Purchased</p>
@@ -71,9 +82,111 @@
           <span style="font-size:.58rem;color:rgba(255,248,238,.5);text-align:center;padding:8px;font-weight:700;">QR<br>pending</span>
         </div>
       {% endif %}
-      <span class="badge badge-{{ ticket.status }}" style="margin-top:4px;">{{ ticket.get_status_display() }}</span>
+      <span id="stub-status-badge" class="badge badge-{{ 'checked_in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.status }}" style="margin-top:4px;">
+        {{ 'Checked in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.get_status_display() }}
+      </span>
     </div>
   </div>
 
   <a href="{{ url('tickets:my_tickets') }}" class="btn btn-secondary">← My Tickets</a>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+  const ticketId = {{ ticket.pk }};
+  const uniqueCode = {{ ticket.unique_code | tojson }};
+  let isCheckedIn = {{ 'true' if ticket.checked_in_at or ticket.status == 'checked_in' else 'false' }};
+  let pollTimer = null;
+
+  function updateToCheckedIn(checkedInAtStr) {
+    if (isCheckedIn) return;
+    isCheckedIn = true;
+
+    // 1. Update pass stamp
+    const stamp = document.getElementById('pass-stamp');
+    if (stamp) {
+      stamp.className = 'pass-stamp pass-stamp--checkedin stamp-animate';
+      stamp.textContent = 'Checked in';
+    }
+
+    // 2. Update status badges
+    const statusBadge = document.getElementById('ticket-status-badge');
+    if (statusBadge) {
+      statusBadge.className = 'badge badge-checked_in badge-pulse';
+      statusBadge.textContent = 'Checked in';
+    }
+
+    const stubBadge = document.getElementById('stub-status-badge');
+    if (stubBadge) {
+      stubBadge.className = 'badge badge-checked_in badge-pulse';
+      stubBadge.textContent = 'Checked in';
+    }
+
+    // 3. Show checked-in timestamp
+    const timeContainer = document.getElementById('checked-in-time-container');
+    const timeText = document.getElementById('checked-in-time');
+    if (timeContainer && timeText) {
+      if (checkedInAtStr) {
+        timeText.textContent = checkedInAtStr;
+      }
+      timeContainer.style.display = '';
+    }
+
+    // 4. Show success banner
+    const notification = document.getElementById('checkin-live-alert');
+    if (notification) {
+      notification.style.display = 'flex';
+      notification.classList.add('badge-pulse');
+    }
+
+    // Stop polling
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+  }
+
+  // API polling
+  async function pollStatus() {
+    if (isCheckedIn) return;
+    try {
+      const response = await fetch('{{ url("tickets:ticket_status", ticket.pk) }}', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.is_checked_in || data.status === 'checked_in') {
+          updateToCheckedIn(data.checked_in_at);
+        }
+      }
+    } catch (e) {}
+  }
+
+  // Cross-tab broadcast listener
+  try {
+    const channel = new BroadcastChannel('tickit_checkin');
+    channel.onmessage = function(e) {
+      if (e.data && (e.data.ticket_id == ticketId || e.data.unique_code === uniqueCode)) {
+        updateToCheckedIn(e.data.checked_in_at);
+      }
+    };
+  } catch(e) {}
+
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'tickit_last_checkin') {
+      try {
+        const data = JSON.parse(e.newValue);
+        if (data && (data.ticket_id == ticketId || data.unique_code === uniqueCode)) {
+          updateToCheckedIn(data.checked_in_at);
+        }
+      } catch (err) {}
+    }
+  });
+
+  if (!isCheckedIn) {
+    pollTimer = setInterval(pollStatus, 2500);
+  }
+})();
+</script>
 {% endblock %}

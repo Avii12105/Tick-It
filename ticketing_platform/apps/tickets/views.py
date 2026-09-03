@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -95,6 +96,9 @@ def checkout(request):
 
 @login_required(login_url="accounts:login")
 def my_tickets(request):
+    if request.headers.get("accept") == "application/json" or request.GET.get("format") == "json":
+        return my_tickets_status(request)
+
     tickets = (
         Ticket.objects.filter(user=request.user)
         .select_related("ticket_type", "event__venue")
@@ -105,8 +109,49 @@ def my_tickets(request):
 
 @login_required(login_url="accounts:login")
 def ticket_detail(request, pk):
+    if request.headers.get("accept") == "application/json" or request.GET.get("format") == "json":
+        return ticket_status(request, pk)
+
     ticket = get_object_or_404(Ticket, pk=pk, user=request.user)
     return render(request, "tickets/ticket_detail.html", {"ticket": ticket})
+
+
+@login_required(login_url="accounts:login")
+def ticket_status(request, pk):
+    ticket = get_object_or_404(Ticket, pk=pk, user=request.user)
+    is_checked_in = bool(ticket.checked_in_at)
+    return JsonResponse({
+        "id": ticket.pk,
+        "is_checked_in": is_checked_in,
+        "status": "checked_in" if is_checked_in else ticket.status,
+        "status_display": "Checked in" if is_checked_in else ticket.get_status_display(),
+        "checked_in_at": (
+            ticket.checked_in_at.strftime("%b %d, %Y · %I:%M %p")
+            if ticket.checked_in_at
+            else None
+        ),
+    })
+
+
+@login_required(login_url="accounts:login")
+def my_tickets_status(request):
+    tickets = Ticket.objects.filter(user=request.user)
+    return JsonResponse({
+        "tickets": [
+            {
+                "id": t.pk,
+                "is_checked_in": bool(t.checked_in_at),
+                "status": "checked_in" if t.checked_in_at else t.status,
+                "status_display": "Checked in" if t.checked_in_at else t.get_status_display(),
+                "checked_in_at": (
+                    t.checked_in_at.strftime("%b %d, %Y · %I:%M %p")
+                    if t.checked_in_at
+                    else None
+                ),
+            }
+            for t in tickets
+        ]
+    })
 
 
 # --- Organizer: Ticket tiers -----------------------------------------------

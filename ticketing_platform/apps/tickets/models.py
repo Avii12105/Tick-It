@@ -165,5 +165,9 @@ class Ticket(models.Model):
     class Meta:
         ordering = ("-purchased_at",)
 
+    @property
+    def is_checked_in(self):
+        return bool(self.checked_in_at)
+
     def __str__(self):
         return f"{self.unique_code} ({self.ticket_type.name} @ {self.event.name})"

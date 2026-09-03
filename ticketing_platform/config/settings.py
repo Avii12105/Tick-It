@@ -4,7 +4,7 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-7ty)j1&g3l=yj*%%h6sy8(7hbv)vd)m+mb3vww98&pxvqa=477')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-build-time-placeholder-do-not-use-in-production')
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 

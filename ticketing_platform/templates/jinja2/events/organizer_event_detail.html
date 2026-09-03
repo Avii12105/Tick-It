@@ -55,6 +55,31 @@
     </div>
   {% endif %}
 
+  {# Check-In Panel #}
+  {% if user.is_authenticated and user.profile.role == 'organizer' and event.organizer_id == user.id %}
+    <div class="checkin-panel mt-3">
+      <h3 class="section-title">Event Check-In</h3>
+      <p class="checkin-panel__description">Scan attendee QR codes at the event entrance:</p>
+      <div class="checkin-panel__actions">
+        <a href="{{ url('events:checkin_single', event.pk) }}" class="btn btn-primary btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l9-9z"/>
+          </svg>
+          Check In
+        </a>
+        <a href="{{ url('events:checkin_bulk', event.pk) }}" class="btn btn-outline btn-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13"/>
+            <path d="M5 3h14v2H5v-2z"/>
+            <circle cx="9" cy="9" r="2"/>
+            <circle cx="15" cy="15" r="2"/>
+          </svg>
+          Bulk Check-In
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
   {# Ticket tiers #}
   <div class="section-header mt-2">
     <h2 class="section-title">Ticket Tiers</h2>

@@ -9,6 +9,16 @@ urlpatterns = [
     path("events/", views.home, name="public_event_list"),
     path("events/<int:pk>/", views.event_detail, name="public_event_detail"),
     path(
+        "events/<int:event_pk>/checkin/",
+        views.checkin_single,
+        name="checkin_single",
+    ),
+    path(
+        "events/<int:event_pk>/checkin/bulk/",
+        views.checkin_bulk,
+        name="checkin_bulk",
+    ),
+    path(
         "organizer/venues/",
         views.venue_list,
         name="venue_list",

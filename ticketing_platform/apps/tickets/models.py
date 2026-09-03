@@ -154,6 +154,13 @@ class Ticket(models.Model):
         default=Status.ACTIVE,
     )
     purchased_at = models.DateTimeField(auto_now_add=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_in_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ("-purchased_at",)

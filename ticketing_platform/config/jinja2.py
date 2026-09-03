@@ -1,7 +1,6 @@
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import reverse
 from django.middleware.csrf import get_token
-from django.utils.html import format_html
 from jinja2 import Environment
 
 

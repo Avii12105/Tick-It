@@ -22,7 +22,7 @@
     {% endif %}
 
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       {{ form.as_p() }}
       <div class="form-actions" style="margin-top:1.5rem;">
         <button type="submit" class="btn btn-primary btn-lg" style="flex:1;justify-content:center;">Create account</button>
@@ -35,3 +35,4 @@
   </div>
 </div>
 {% endblock %}
+

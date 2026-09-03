@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waitlist Promotion</title>
+</head>
+<body style="font-family:system-ui, sans-serif; max-width:600px; margin:0 auto; padding:20px;">
+    <div style="background:var(--primary); color:white; padding:20px; border-radius:8px; text-align:center;">
+        <h1>Congratulations!</h1>
+    </div>
+    <div style="margin:20px 0; padding:20px; background:#f8f9fa; border-radius:8px;">
+        <p>Great news! You've been promoted from the waitlist for <strong>{{ event.name }}</strong>.</p>
+        <p>A ticket has been allocated to you. You can now access your ticket in 'My Tickets'.</p>
+        <p>If you have any questions, please contact the event organizer.</p>
+    </div>
+    <div style="text-align:center; margin-top:30px;">
+        <a href="{{ url('events:organizer_event_detail', event.pk) }}" style="display:inline-block; background:var(--primary); color:white; padding:10px 20px; text-decoration:none; border-radius:4px;">View Event</a>
+    </div>
+    <p style="font-size:12px; color:#666; margin-top:30px;">This is an automated message from TickIt. Please do not reply to this email.</p>
+</body>
+</html>

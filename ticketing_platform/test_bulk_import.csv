@@ -1,0 +1,9 @@
+email,full_name,ticket_type
+felix@test.com,Felix Wagner,Comp
+amara@test.com,Amara Diallo,Mech
+sven@test.com,Sven Lindqvist,Comp
+yuki@test.com,Yuki Tanaka,Mech
+,Eve Missing,Comp
+nobody3@test.com,,Mech
+ghost3@test.com,Ghost User,VIP
+solo3@test.com,Solo Entry,

@@ -1,6 +1,25 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import Event, Venue
+
+
+class BulkImportForm(forms.Form):
+    csv_file = forms.FileField(
+        label="CSV File",
+        help_text="Max 5MB. Columns: email, full_name, ticket_type (optional).",
+    )
+
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data.get("csv_file")
+        if csv_file:
+            # Check file size (5MB limit)
+            if csv_file.size > 5 * 1024 * 1024:
+                raise ValidationError("File must be under 5MB.")
+            # Check content type
+            if not csv_file.content_type == "text/csv":
+                raise ValidationError("File must be a CSV.")
+        return csv_file
 
 
 class VenueForm(forms.ModelForm):

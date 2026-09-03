@@ -1,0 +1,31 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Bulk Import VIP Guests - {{ event.name }}{% endblock %}
+
+{% block content %}
+  <nav class="breadcrumb">
+    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__current">Bulk Import {{ event.name }}</span>
+  </nav>
+
+  <div class="page-header-row">
+    <div class="page-header">
+      <p class="page-header__eyebrow">{{ event.venue.name }}</p>
+      <h1 class="page-header__title">Bulk Import VIP Guests</h1>
+      <p class="page-header__sub">{{ event.name }}</p>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <p class="section-title">Upload VIP guests CSV</p>
+    <p class="help-text">Columns: <code>email</code>, <code>full_name</code>, <code>ticket_type</code> (optional). Max 5MB.</p>
+  </div>
+
+<form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    {{ form.as_p() }}
+    <button type="submit" class="btn btn-primary">Import Guests</button>
+    <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-outline">Cancel</a>
+  </form>
+{% endblock %}

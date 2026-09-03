@@ -184,33 +184,54 @@ def _check_authorize_event(request, event):
 
 @login_required
 def checkin_single(request, event_pk):
-    """Single QR code validation and check-in.
+    """Single QR code validation, check-in, and check-in page rendering.
     
+    GET /events/{event_pk}/checkin/
     POST /events/{event_pk}/checkin/
     """
     event = get_object_or_404(Event, pk=event_pk)
 
     authorized, error = _check_authorize_event(request, event)
     if error:
+        if request.method == "GET":
+            messages.error(request, "You are not authorized to check-in tickets for this event.")
+            return redirect("events:organizer_event_detail", pk=event.pk)
         return error
 
-    if request.method != "POST":
-        return JsonResponse({"error": "POST method required"}, status=405)
+    # 1. Handle GET request: Render the check-in UI
+    if request.method == "GET":
+        return render(request, "events/checkin.html", {"event": event})
 
+    # 2. Handle POST request: Process the QR Code payload
     import json
     try:
         body = json.loads(request.body)
-    except Exception:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        qr_code = body.get("qr_code", "").strip() if body else ""
+    except json.JSONDecodeError:
+        qr_code = request.POST.get("qr_code", "").strip()
 
-    qr_code = body.get("qr_code", "").strip() if body else ""
+    is_json_request = request.content_type == "application/json"
+
     if not qr_code:
-        return JsonResponse({"error": "QR code is required"}, status=400)
+        if is_json_request:
+            return JsonResponse({"error": "QR code is required"}, status=400)
+        messages.error(request, "QR code is required.")
+        return redirect(request.path)
 
     from apps.tickets.services import checkin_ticket
-
     result = checkin_ticket(qr_code, event_pk, request.user)
-    return JsonResponse(result, status=200 if result.get("status") == "checked_in" else 400)
+    
+    # Return JSON if triggered by JavaScript fetch()
+    if is_json_request:
+        return JsonResponse(result, status=200 if result.get("status") == "checked_in" else 400)
+    
+    # Return standard redirect if triggered by HTML form submission
+    if result.get("status") == "checked_in":
+        messages.success(request, result.get("message", "Ticket checked in successfully."))
+    else:
+        messages.error(request, result.get("message", "Validation failed."))
+    
+    return redirect(request.path)
 
 
 @login_required
@@ -223,10 +244,15 @@ def checkin_bulk(request, event_pk):
 
     authorized, error = _check_authorize_event(request, event)
     if error:
+        if request.method == "GET":
+            messages.error(request, "You are not authorized to check-in tickets for this event.")
+            return redirect("events:organizer_event_detail", pk=event.pk)
         return error
 
-    if request.method != "POST":
-        return JsonResponse({"error": "POST method required"}, status=405)
+    # Gracefully redirect browser GET requests back to the check-in UI
+    if request.method == "GET":
+        # Adjust the redirect string if your URL name is different
+        return redirect("events:checkin_single", event_pk=event.pk)
 
     import json
     try:

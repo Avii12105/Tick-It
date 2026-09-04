@@ -14,7 +14,7 @@
   {% if tickets %}
     <div class="ticket-cards">
       {% for t in tickets %}
-        <a href="{{ url('tickets:ticket_detail', t.pk) }}" class="tkt-card" aria-label="Ticket for {{ t.event.name }}">
+        <a href="{{ url('tickets:ticket_detail', t.pk) }}" class="tkt-card" id="ticket-card-{{ t.pk }}" data-ticket-id="{{ t.pk }}" data-checked-in="{{ 'true' if t.checked_in_at or t.status == 'checked_in' else 'false' }}" aria-label="Ticket for {{ t.event.name }}">
           <div class="tkt-card__divider" aria-hidden="true"></div>
           <div class="tkt-card__info">
             <p class="tkt-card__tier">{{ t.ticket_type.name }}</p>
@@ -22,7 +22,11 @@
             <p class="tkt-card__date">{{ t.event.date.strftime('%b %d, %Y · %I:%M %p') }}</p>
             <p class="tkt-card__date">{{ t.event.venue.name }}</p>
             <div style="margin-top:6px;">
-              <span class="badge badge-{{ t.status }}">{{ t.get_status_display() }}</span>
+              {% if t.checked_in_at or t.status == 'checked_in' %}
+                <span class="badge badge-checked_in ticket-badge" id="ticket-badge-{{ t.pk }}">Checked in</span>
+              {% else %}
+                <span class="badge badge-{{ t.status }} ticket-badge" id="ticket-badge-{{ t.pk }}">{{ t.get_status_display() }}</span>
+              {% endif %}
             </div>
           </div>
           <div class="tkt-card__stub">
@@ -41,4 +45,74 @@
       <a href="{{ url('events:home') }}" class="btn btn-primary">Browse events</a>
     </div>
   {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function() {
+  function markCardCheckedIn(ticketId) {
+    const card = document.getElementById('ticket-card-' + ticketId);
+    if (card && card.dataset.checkedIn !== 'true') {
+      card.dataset.checkedIn = 'true';
+      const badge = document.getElementById('ticket-badge-' + ticketId);
+      if (badge) {
+        badge.className = 'badge badge-checked_in ticket-badge badge-pulse';
+        badge.textContent = 'Checked in';
+      }
+      card.classList.add('badge-pulse');
+    }
+  }
+
+  // Cross-tab broadcast listener
+  try {
+    const channel = new BroadcastChannel('tickit_checkin');
+    channel.onmessage = function(e) {
+      if (e.data && e.data.ticket_id) {
+        markCardCheckedIn(e.data.ticket_id);
+      }
+    };
+  } catch(e) {}
+
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'tickit_last_checkin') {
+      try {
+        const data = JSON.parse(e.newValue);
+        if (data && data.ticket_id) {
+          markCardCheckedIn(data.ticket_id);
+        }
+      } catch (err) {}
+    }
+  });
+
+  // Polling server for updates if there are any unchecked tickets
+  async function pollTickets() {
+    const remaining = document.querySelectorAll('.tkt-card[data-checked-in="false"]');
+    if (!remaining.length) {
+      if (pollTimer) clearInterval(pollTimer);
+      return;
+    }
+    try {
+      const response = await fetch('{{ url("tickets:my_tickets_status") }}', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.tickets) {
+          data.tickets.forEach(function(t) {
+            if (t.is_checked_in || t.status === 'checked_in') {
+              markCardCheckedIn(t.id);
+            }
+          });
+        }
+      }
+    } catch (err) {}
+  }
+
+  const unchecked = document.querySelectorAll('.tkt-card[data-checked-in="false"]');
+  let pollTimer = null;
+  if (unchecked.length > 0) {
+    pollTimer = setInterval(pollTickets, 3000);
+  }
+})();
+</script>
 {% endblock %}

@@ -9,7 +9,9 @@
       <h1 class="page-header__title">My Venues</h1>
       <p class="page-header__sub">Venues are reusable across multiple events.</p>
     </div>
-    <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+    {% if venues %}
+      <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+    {% endif %}
   </div>
 
   {% if venues %}

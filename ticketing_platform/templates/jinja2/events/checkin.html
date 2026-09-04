@@ -1,0 +1,652 @@
+{% extends "base/layout.html" %}
+
+{% block title %}Check In · {{ event.name }} · TickIt{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="{{ url('events:home') }}">Events</a>
+  <span class="breadcrumb__sep" aria-hidden="true">›</span>
+  <span class="breadcrumb__current">{{ event.name }}</span>
+</nav>
+
+<div class="event-layout">
+  <div class="event-layout__main">
+    <div class="checkin-container">
+      <div class="checkin-header">
+        <h2>{{ event.name }}</h2>
+        <p class="checkin-event-meta">
+          <span>{{ event.venue.name }}</span>
+          <span>{{ event.date.strftime('%A, %B %d, %Y') }}</span>
+        </p>
+      </div>
+
+      <div class="checkin-status" id="checkin-status">
+        <p class="checkin-status__message">Scan a QR code to check in</p>
+      </div>
+
+      <div class="checkin-qr-wrapper">
+        <div class="checkin-qr-card">
+          <div class="checkin-qr-preview">
+            <svg class="qr-svg" viewBox="0 0 256 256" aria-label="QR code preview">
+              <rect width="256" height="256" fill="#f0f0f0"/>
+              <text x="128" y="128" fill="#666" font-size="20" text-anchor="middle">QR Code</text>
+            </svg>
+            <p class="qr-preview__text">Scan QR code above</p>
+          </div>
+          <div class="qr-scanner-controls">
+            <input type="text" class="qr-code-input" id="qr-code-input" placeholder="Scan or paste QR code" aria-label="QR code input">
+            <button class="btn btn-primary qr-scan-btn" type="button" id="scan-btn">
+              Scan QR Code
+            </button>
+            <button class="btn btn-outline secondary qr-camera-btn" type="button" id="camera-btn">
+              Scan from Camera
+            </button>
+          </div>
+          <div id="camera-feed" style="display: none; margin-top: 1rem;">
+            <video id="video" autoplay playsinline style="width: 100%; max-width: 256px; margin: 0 auto;"></video>
+            <canvas id="canvas" style="display: none; width: 256px; height: 256px;"></canvas>
+            <div id="scanner-status" style="margin-top: 0.5rem; color: var(--text-3); font-size: 0.875;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkin-results" id="checkin-results" style="display: none;">
+        <h3 class="checkin-results__title">Check-In Results</h3>
+        <div class="checkin-results__list" id="checkin-results-list"></div>
+      </div>
+
+      <div class="checkin-qr-codes" id="checkin-qr-codes" style="margin-top: 2rem; display: none;">
+        <h3 class="checkin-results__title">Multiple QR Codes</h3>
+        <div class="qr-codes-input">
+          <textarea class="qr-textarea" id="qr-textarea" rows="3" placeholder="Enter one QR code per line"></textarea>
+          <button class="btn btn-primary qr-bulk-btn" type="button" id="bulk-scan-btn">Bulk Validate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="event-layout__aside">
+    {% if user.is_authenticated and user.profile.role == 'organizer' and event.organizer_id == user.id %}
+      <div class="organizer-actions">
+        <h4>Organizer Tools</h4>
+        <ul class="organizer-list">
+          <li>
+            <a href="{{ url('events:organizer_event_detail', pk=event.pk) }}" class="organizer-list__item">
+              Event Details
+            </a>
+          </li>
+          <li>
+            <a href="{{ url('tickets:my_tickets') }}" class="organizer-list__item">
+              My Tickets
+            </a>
+          </li>
+        </ul>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+
+<form id="csrf-form" style="display:none;">
+  <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+</form>
+
+<script type="module">
+// Load jsQR library for QR code detection from CDN
+const jsQRScript = document.createElement('script');
+jsQRScript.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+document.head.appendChild(jsQRScript);
+
+let qrCodeInput = document.getElementById('qr-code-input');
+let scanBtn = document.getElementById('scan-btn');
+let scanningInterval;
+let checkinStatus = document.getElementById('checkin-status');
+let checkinResults = document.getElementById('checkin-results');
+let checkinResultsList = document.getElementById('checkin-results-list');
+let qrCodesTextarea = document.getElementById('qr-textarea');
+let bulkScanBtn = document.getElementById('bulk-scan-btn');
+let checkinQrCodes = document.getElementById('checkin-qr-codes');
+let eventId = {{ event.pk }};
+
+{% if user.is_authenticated and user.profile.role == 'organizer' and event.organizer_id == user.id %}
+  let isOrganizer = true;
+{% else %}
+  let isOrganizer = false;
+{% endif %}
+
+// Show success/error message
+function showMessage(type, message) {
+  const statusDiv = document.getElementById('checkin-status');
+  statusDiv.className = `checkin-status checkin-status--${type}`;
+  statusDiv.innerHTML = `<p>${message}</p>`;
+}
+
+// Show results
+function showResults(results) {
+  const resultsDiv = document.getElementById('checkin-results');
+  const resultsList = document.getElementById('checkin-results-list');
+  
+  let html = '';
+  results.forEach((result, index) => {
+    const statusClass = result.status.replace(/_/g, '-');
+    html += `
+      <div class="checkin-result-item">
+        <span class="checkin-result-qr">QR: ${result.qr_code}</span>
+        <span class="checkin-result-status badge badge-${statusClass}">${result.status.replace(/_/g, ' ')}</span>
+        ${result.ticket_id ? `<span class="checkin-result-ticket">Ticket: ${result.ticket_id}</span>` : ''}
+        ${result.message ? `<span class="checkin-result-message">${result.message}</span>` : ''}
+      </div>
+    `;
+  });
+  
+  resultsList.innerHTML = html;
+  resultsDiv.style.display = 'block';
+  checkinQrCodes.style.display = 'none';
+}
+
+// Handle single QR check-in
+async function handleSingleCheckIn(qrCode) {
+  if (!qrCode.trim()) {
+    showMessage('error', 'QR code is required');
+    return;
+  }
+  
+  showMessage('loading', 'Validating QR code...');
+  
+  try {
+    const response = await fetch(
+      window.location.href,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ qr_code: qrCode }),
+        credentials: 'same-origin',
+      }
+    );
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      showMessage('success', result.message || 'Ticket checked in successfully');
+      renderResult(result, true);
+      
+      if (result.status === 'checked_in') {
+        try {
+          const channel = new BroadcastChannel('tickit_checkin');
+          channel.postMessage({
+            ticket_id: result.ticket_id,
+            unique_code: qrCode,
+            status: 'checked_in',
+            checked_in_at: result.checked_in_at
+          });
+        } catch(e) {}
+        try {
+          localStorage.setItem('tickit_last_checkin', JSON.stringify({
+            ticket_id: result.ticket_id,
+            unique_code: qrCode,
+            status: 'checked_in',
+            checked_in_at: result.checked_in_at,
+            timestamp: Date.now()
+          }));
+        } catch(e) {}
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } else {
+      showMessage('error', result.message || 'Validation failed');
+      renderResult(result, false);
+    }
+  } catch (error) {
+    showMessage('error', 'Network error. Please try again.');
+    console.error('Check-in error:', error);
+  }
+}
+
+// Handle bulk QR check-in
+async function handleBulkCheckIn() {
+  const qrText = qrCodesTextarea.value.trim();
+  if (!qrText) {
+    showMessage('error', 'At least one QR code is required');
+    return;
+  }
+  
+  const qrCodes = qrText.split('\n')
+    .map(code => code.trim())
+    .filter(code => code.length > 0);
+  
+  if (qrCodes.length === 0) {
+    showMessage('error', 'No valid QR codes found');
+    return;
+  }
+  
+  if (qrCodes.length > 100) {
+    showMessage('error', 'Maximum 100 QR codes per batch');
+    return;
+  }
+  
+  showMessage('loading', 'Validating ' + qrCodes.length + ' QR codes...');
+  
+  try {
+    const response = await fetch(
+      `${window.location.origin}${window.location.pathname}bulk/`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({ qr_codes: qrCodes }),
+        credentials: 'same-origin',
+      }
+    );
+    
+    const result = await response.json();
+    
+    if (response.ok) {
+      showResults(result.results);
+      showMessage('success', 'Processed ' + qrCodes.length + ' QR codes');
+      if (result.results && Array.isArray(result.results)) {
+        result.results.forEach(function(r) {
+          if (r.status === 'checked_in' && r.ticket_id) {
+            try {
+              const channel = new BroadcastChannel('tickit_checkin');
+              channel.postMessage({
+                ticket_id: r.ticket_id,
+                unique_code: r.qr_code,
+                status: 'checked_in'
+              });
+            } catch(e) {}
+            try {
+              localStorage.setItem('tickit_last_checkin', JSON.stringify({
+                ticket_id: r.ticket_id,
+                unique_code: r.qr_code,
+                status: 'checked_in',
+                timestamp: Date.now()
+              }));
+            } catch(e) {}
+          }
+        });
+      }
+    } else {
+      showResults([result]);
+      showMessage('error', result.message || 'Batch validation failed');
+    }
+  } catch (error) {
+    showMessage('error', 'Network error. Please try again.');
+    console.error('Bulk check-in error:', error);
+  }
+}
+
+// Render individual result
+function renderResult(result, isSuccess) {
+  const resultsList = document.getElementById('checkin-results-list');
+  
+  const statusClass = result.status.replace(/_/g, '-');
+  const html = `
+    <div class="checkin-result-item">
+      <span class="checkin-result-qr">QR: ${result.qr_code}</span>
+      <span class="checkin-result-status badge badge-${statusClass}">${result.status.replace(/_/g, ' ')}</span>
+      ${result.ticket_id ? `<span class="checkin-result-ticket">Ticket: ${result.ticket_id}</span>` : ''}
+      ${result.message ? `<span class="checkin-result-message">${result.message}</span>` : ''}
+    </div>
+  `;
+  
+  resultsList.innerHTML = html;
+  checkinResults.style.display = 'block';
+  checkinQrCodes.style.display = 'none';
+}
+
+// Get CSRF token from the hidden form
+function getCSRFToken() {
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+  return csrfToken ? csrfToken.value : '';
+}
+
+// Initialize QR code scanner (called once jsQR is ready)
+function initScanner() {
+  const cameraBtn = document.getElementById('camera-btn');
+  const cameraFeed = document.getElementById('camera-feed');
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const scannerStatus = document.getElementById('scanner-status');
+  let stream = null;
+  let scanning = false;
+
+  cameraBtn.addEventListener('click', function() {
+    if (stream) {
+      stopScanner();
+    } else {
+      startScanner();
+    }
+  });
+
+  function startScanner() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showMessage('error', 'Camera not supported on this device or page must be served over HTTPS.');
+      return;
+    }
+
+    cameraBtn.textContent = 'Starting camera…';
+    cameraBtn.disabled = true;
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } }
+    }).then(function(mediaStream) {
+      stream = mediaStream;
+      video.srcObject = mediaStream;
+      cameraFeed.style.display = 'block';
+
+      video.addEventListener('loadeddata', function onLoaded() {
+        video.removeEventListener('loadeddata', onLoaded);
+        cameraBtn.textContent = '⏹ Stop Camera';
+        cameraBtn.disabled = false;
+        scannerStatus.textContent = 'Scanning — point camera at a QR code…';
+        startScanning();
+      });
+    }).catch(function(err) {
+      console.error('Camera access error:', err);
+      cameraBtn.textContent = 'Scan from Camera';
+      cameraBtn.disabled = false;
+      if (err.name === 'NotAllowedError') {
+        showMessage('error', 'Camera access denied. Please grant camera permission and try again.');
+      } else if (err.name === 'NotFoundError') {
+        showMessage('error', 'No camera found on this device.');
+      } else {
+        showMessage('error', 'Could not access camera: ' + err.message);
+      }
+    });
+  }
+
+  function startScanning() {
+    if (scanning) return;
+    scanning = true;
+
+    canvas.width = video.videoWidth || 256;
+    canvas.height = video.videoHeight || 256;
+    const ctx = canvas.getContext('2d');
+
+    scanningInterval = setInterval(function() {
+      if (!stream) { clearInterval(scanningInterval); scanning = false; return; }
+      if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+      // jsQR(data, width, height, options)
+      // inversionAttempts: 'dontInvert' | 'onlyInvert' | 'attemptBoth' | 'invertFirst'
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert',
+      });
+
+      if (code && code.data) {
+        clearInterval(scanningInterval);
+        scanning = false;
+        stopScanner();
+        qrCodeInput.value = code.data;
+        handleSingleCheckIn(code.data);
+      }
+    }, 250);
+  }
+
+  function stopScanner() {
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    if (scanningInterval) {
+      clearInterval(scanningInterval);
+      scanningInterval = null;
+    }
+    scanning = false;
+    video.srcObject = null;
+    cameraFeed.style.display = 'none';
+    scannerStatus.textContent = '';
+    cameraBtn.textContent = 'Scan from Camera';
+    cameraBtn.disabled = false;
+  }
+}
+
+// Wire up all event listeners + wait for jsQR to load
+document.addEventListener('DOMContentLoaded', function() {
+  // Single QR scan button
+  scanBtn.addEventListener('click', function() {
+    handleSingleCheckIn(qrCodeInput.value);
+  });
+
+  // Enter key in QR input
+  qrCodeInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      handleSingleCheckIn(qrCodeInput.value);
+    }
+  });
+
+  // Bulk scan button
+  bulkScanBtn.addEventListener('click', function() {
+    handleBulkCheckIn();
+  });
+
+  // Enter key in bulk textarea
+  qrCodesTextarea.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      handleBulkCheckIn();
+    }
+  });
+
+  // Initialize camera scanner once jsQR has loaded
+  jsQRScript.addEventListener('load', initScanner);
+  // If the script already loaded before DOMContentLoaded fired (unlikely but safe)
+  if (typeof jsQR !== 'undefined') initScanner();
+});
+</script>
+
+
+<style>
+/* Check-in Page Styles */
+.checkin-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.checkin-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.checkin-header h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--dark);
+}
+
+.checkin-event-meta {
+  color: var(--text-3);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.checkin-status {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.checkin-status--loading {
+  background-color: var(--background-subtle);
+}
+
+.checkin-status--success {
+  background-color: var(--success-light);
+}
+
+.checkin-status--error {
+  background-color: var(--danger-light);
+}
+
+.checkin-qr-wrapper {
+  margin-bottom: 2rem;
+}
+
+.checkin-qr-card {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 2rem;
+  text-align: center;
+  transition: border-color 0.3s;
+}
+
+.checkin-qr-card:hover {
+  border-color: var(--primary);
+}
+
+.qr-svg {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 1rem;
+}
+
+.qr-preview__text {
+  color: var(--text-3);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.qr-code-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  transition: border-color 0.3s;
+}
+
+.qr-code-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.qr-scan-btn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+.checkin-results {
+  margin-top: 2rem;
+  display: none;
+}
+
+.checkin-results__title {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--dark);
+}
+
+.checkin-results__list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.checkin-result-item {
+  padding: 0.75rem;
+  background-color: var(--background-subtle);
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.checkin-result-qr {
+  color: var(--text-2);
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.checkin-result-status {
+  margin-left: 1rem;
+}
+
+.checkin-result-ticket {
+  color: var(--primary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.checkin-result-message {
+  color: var(--text-3);
+  font-size: 0.75rem;
+  margin-left: 1rem;
+}
+
+.qr-codes-input {
+  background-color: var(--background-subtle);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.qr-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.qr-bulk-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* Organizer actions */
+.organizer-actions {
+  background-color: var(--background-subtle);
+  padding: 1rem;
+  border-radius: var(--radius);
+  margin-top: 1rem;
+}
+
+.organizer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.organizer-list__item {
+  display: block;
+  padding: 0.5rem 0;
+  color: var(--primary);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .checkin-container {
+    padding: 1rem;
+  }
+  
+  .checkin-qr-card {
+    padding: 1rem;
+  }
+  
+  .qr-svg {
+    width: 120px;
+    height: 120px;
+  }
+}
+</style>
+{% endblock %}

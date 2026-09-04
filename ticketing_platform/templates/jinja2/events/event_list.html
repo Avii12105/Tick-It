@@ -8,13 +8,8 @@
       <p class="page-header__eyebrow">Now showing</p>
       <h1 class="page-header__title">Upcoming Events</h1>
     </div>
-    {% if user.is_authenticated and user.profile.is_organizer() %}
+    {% if events and user.is_authenticated and user.profile.is_organizer() %}
       <a href="{{ url('events:event_create') }}" class="btn btn-primary">+ New Event</a>
-    {% elif not user.is_authenticated %}
-      <div style="display:flex;gap:.6rem;">
-        <a href="{{ url('accounts:login') }}" class="btn btn-ghost btn-sm">Sign in</a>
-        <a href="{{ url('accounts:signup') }}" class="btn btn-primary btn-sm">Sign up</a>
-      </div>
     {% endif %}
   </div>
 

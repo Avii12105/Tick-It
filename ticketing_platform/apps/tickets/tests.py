@@ -216,7 +216,7 @@ class CartFlowTests(TestCase):
             reverse("events:public_event_detail", args=[self.event.pk])
         )
         self.assertContains(response, "GA")
-        self.assertContains(response, "Add to cart")
+        self.assertContains(response, "Sign up to reserve")
 
     def test_tier_over_capacity_form_rejected(self):
         TicketType.objects.create(
@@ -420,3 +420,57 @@ class CheckoutTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, ticket.unique_code)
         self.assertContains(response, ticket.qr_image.url)
+
+    def test_ticket_detail_shows_checked_in_when_checked_in(self):
+        self.reserve(quantity=1)
+        ticket = checkout_cart(self.user)[0]
+        ticket.checked_in_at = timezone.now()
+        ticket.save()
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("tickets:ticket_detail", args=[ticket.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Checked in")
+        self.assertContains(response, "pass-stamp--checkedin")
+        self.assertContains(response, "badge-checked_in")
+
+    def test_my_tickets_shows_checked_in_badge(self):
+        self.reserve(quantity=1)
+        ticket = checkout_cart(self.user)[0]
+        ticket.checked_in_at = timezone.now()
+        ticket.save()
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("tickets:my_tickets"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Checked in")
+        self.assertContains(response, "badge-checked_in")
+
+    def test_ticket_status_json_endpoint(self):
+        self.reserve(quantity=1)
+        ticket = checkout_cart(self.user)[0]
+        ticket.checked_in_at = timezone.now()
+        ticket.save()
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("tickets:ticket_status", args=[ticket.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data["is_checked_in"])
+        self.assertEqual(data["status"], "checked_in")
+        self.assertEqual(data["status_display"], "Checked in")
+        self.assertIsNotNone(data["checked_in_at"])
+
+    def test_my_tickets_status_json_endpoint(self):
+        self.reserve(quantity=1)
+        ticket = checkout_cart(self.user)[0]
+        ticket.checked_in_at = timezone.now()
+        ticket.save()
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("tickets:my_tickets_status"))
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("tickets", data)
+        self.assertTrue(data["tickets"][0]["is_checked_in"])
+        self.assertEqual(data["tickets"][0]["status"], "checked_in")

@@ -3,6 +3,48 @@ from django.core.exceptions import ValidationError
 from django.db import models
 
 
+class WaitlistEntry(models.Model):
+    class Status(models.TextChoices):
+        WAITING = "waiting", "Waiting"
+        PROMOTED = "promoted", "Promoted"
+
+    event = models.ForeignKey(
+        "Event",
+        on_delete=models.CASCADE,
+        related_name="waitlist_entries",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="waitlist_entries",
+    )
+    email = models.CharField(max_length=254)
+    full_name = models.CharField(max_length=200)
+    ticket_type = models.ForeignKey(
+        "tickets.TicketType",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="waitlist_entries",
+    )
+    position = models.PositiveIntegerField(default=0)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.WAITING,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("position",)
+        unique_together = ("event", "email")
+
+    def __str__(self):
+        return f"{self.full_name} ({self.email}) - {self.event.name}"
+
+
 class Venue(models.Model):
     name = models.CharField(max_length=200)
     address = models.TextField(blank=True)
@@ -87,3 +129,54 @@ class Event(models.Model):
                         )
                     }
                 )
+
+    def promote_next(self):
+        """Promote the first waitlist entry if capacity permits."""
+        from apps.tickets.models import TicketType
+
+        # Find the first waiting waitlist entry
+        entry = self.waitlist_entries.filter(
+            status=WaitlistEntry.Status.WAITING
+        ).order_by("position").first()
+
+        if not entry:
+            return None
+
+        # Check if there's an available ticket type with capacity
+        ticket_types = self.ticket_types.filter(
+            quantity_sold__lt=F("quantity_total")
+        )
+
+        if not ticket_types.exists():
+            return None
+
+        # Allocate a ticket from the first available tier
+        ticket_type = ticket_types.first()
+
+        # Create the ticket directly
+        from apps.tickets.services import generate_unique_code
+        from django.db import transaction
+        import qrcode
+        from io import BytesIO
+        from django.core.files.base import ContentFile
+
+        code = generate_unique_code()
+        ticket = Ticket(
+            ticket_type=ticket_type,
+            event=self,
+            user=entry.user,
+            unique_code=code,
+            status=Ticket.Status.ACTIVE,
+        )
+        ticket.save()
+        # Generate QR code
+        img = qrcode.make(code)
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        ticket.qr_image.save(f"{code}.png", ContentFile(buf.getvalue()), save=True)
+
+        # Mark the waitlist entry as promoted
+        entry.status = WaitlistEntry.Status.PROMOTED
+        entry.save()
+
+        return entry

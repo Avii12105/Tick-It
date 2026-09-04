@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'apps.accounts',   # User roles and profiles
     'apps.events',     # Venues, events, waitlist
     'apps.tickets',    # Ticket types, reservations, QR tickets
+    'cloudinary_storage',  # Cloudinary media storage (QR images)
+    'cloudinary',          # Cloudinary SDK
 ]
 
 # ---- Middleware -----------------------------------------------------------
@@ -152,9 +154,17 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ---- Media files (user uploads — QR images) ------------------------------
+# In production, files are stored on Cloudinary so they survive container
+# restarts on Railway (Railway's filesystem is ephemeral).
+# Set CLOUDINARY_URL in Railway's environment variables.
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Use Cloudinary for media storage when CLOUDINARY_URL is set (production).
+# Falls back to local filesystem storage when running locally.
+if os.environ.get('CLOUDINARY_URL'):
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

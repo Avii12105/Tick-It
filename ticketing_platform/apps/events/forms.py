@@ -1,12 +1,3 @@
-"""
-Events forms — VenueForm, EventForm, and BulkImportForm.
-
-VenueForm and EventForm are standard ModelForms with one key detail:
-EventForm's venue queryset is scoped to the requesting organizer's venues
-so a crafted POST referencing another organizer's venue ID is rejected at
-the form level, not just hidden from the dropdown.
-"""
-
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -14,61 +5,68 @@ from .models import Event, Venue
 
 
 class VenueForm(forms.ModelForm):
-    """Simple form for creating/editing a venue. Owner is set in the view."""
-
     class Meta:
         model  = Venue
         fields = ("name", "address", "max_capacity")
 
 
 class EventForm(forms.ModelForm):
-    """
-    Form for creating/editing an event.
-
-    The venue field queryset is filtered to the organizer's own venues so:
-      - The dropdown only shows venues the organizer owns.
-      - A crafted POST with someone else's venue pk is rejected by Django's
-        ModelChoiceField validation before the view logic even runs.
-    """
-
-    # Override the widget so browsers render a native datetime picker.
     date = forms.DateTimeField(
-        widget=forms.DateTimeInput(
-            attrs={"type": "datetime-local"},
-            format="%Y-%m-%dT%H:%M",
-        ),
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
         input_formats=["%Y-%m-%dT%H:%M"],
+        required=True,
+    )
+    end_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+        input_formats=["%Y-%m-%dT%H:%M"],
+        required=False,
+        label="End date / time (optional)",
+    )
+    cover_color = forms.CharField(
+        required=False,
+        label="Banner colour",
+        widget=forms.TextInput(attrs={"type": "color", "style": "width:60px;height:36px;padding:2px 4px;cursor:pointer;"}),
+        help_text="Pick a colour for the event banner.",
     )
 
     class Meta:
         model  = Event
         fields = (
-            "venue",
-            "name",
-            "description",
-            "date",
-            "allocated_capacity",
-            "status",
+            # Core — required
+            "name", "venue", "date", "allocated_capacity",
+            # Core — optional
+            "tagline", "description", "end_date", "status",
+            # Customisation
+            "category", "location_type", "tags",
+            "website", "cover_color", "cover_image",
         )
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 4}),
+        }
 
     def __init__(self, *args, **kwargs):
-        # organizer is passed from the view — not a model field, so we pop it
-        # before calling super() to avoid Django complaining about an unknown kwarg.
         organizer = kwargs.pop("organizer", None)
         super().__init__(*args, **kwargs)
+
+        # Only required fields
+        required = {"name", "venue", "date", "allocated_capacity"}
+        for field_name, field in self.fields.items():
+            if field_name not in required:
+                field.required = False
+
         if organizer is not None:
-            # Scope venue choices to the organizer's own venues only.
             self.fields["venue"].queryset = Venue.objects.filter(owner=organizer)
+
+    def clean_cover_color(self):
+        val = self.cleaned_data.get("cover_color", "").strip()
+        if val and not val.startswith("#"):
+            val = "#" + val
+        if val and len(val) not in (4, 7):
+            raise ValidationError("Enter a valid hex colour, e.g. #5B4CF5.")
+        return val
 
 
 class BulkImportForm(forms.Form):
-    """
-    Form for uploading a CSV of VIP guests (V5 bulk import).
-
-    Accepts a CSV file with columns: email, full_name, ticket_type (optional).
-    Validates size and content type before the view processes the rows.
-    """
-
     csv_file = forms.FileField(
         label="CSV File",
         help_text="Max 5MB. Columns: email, full_name, ticket_type (optional).",
@@ -77,9 +75,6 @@ class BulkImportForm(forms.Form):
     def clean_csv_file(self):
         csv_file = self.cleaned_data.get("csv_file")
         if csv_file:
-            # Reject files over 5MB to prevent memory issues during parsing.
             if csv_file.size > 5 * 1024 * 1024:
                 raise ValidationError("File must be under 5MB.")
-            if csv_file.content_type != "text/csv":
-                raise ValidationError("File must be a CSV.")
         return csv_file

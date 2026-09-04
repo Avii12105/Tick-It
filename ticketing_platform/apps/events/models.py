@@ -144,7 +144,10 @@ class Event(models.Model):
     )
     name        = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    # Short one-liner shown on cards and listings.
+    tagline     = models.CharField(max_length=300, blank=True)
     date        = models.DateTimeField()
+    end_date    = models.DateTimeField(null=True, blank=True, help_text="Optional end date/time.")
     # The total ticket budget for this event — must not exceed venue.max_capacity.
     allocated_capacity = models.PositiveIntegerField(
         help_text="Total number of tickets this event will sell.",
@@ -154,6 +157,33 @@ class Event(models.Model):
         choices=Status.choices,
         default=Status.DRAFT,
     )
+
+    # ── Customisation / display ──────────────────────────────────────────
+    class Category(models.TextChoices):
+        CONFERENCE  = "conference",  "Conference"
+        MEETUP      = "meetup",      "Meetup"
+        HACKATHON   = "hackathon",   "Hackathon"
+        WORKSHOP    = "workshop",    "Workshop"
+        CONCERT     = "concert",     "Concert"
+        SPORTS      = "sports",      "Sports"
+        NETWORKING  = "networking",  "Networking"
+        OTHER       = "other",       "Other"
+
+    class LocationType(models.TextChoices):
+        IN_PERSON = "in_person", "In Person"
+        ONLINE    = "online",    "Online"
+        HYBRID    = "hybrid",    "Hybrid"
+
+    category      = models.CharField(max_length=30, choices=Category.choices, default=Category.OTHER, blank=True)
+    location_type = models.CharField(max_length=20, choices=LocationType.choices, default=LocationType.IN_PERSON, blank=True)
+    # Comma-separated tags e.g. "AI, Python, Beginner"
+    tags          = models.CharField(max_length=300, blank=True, help_text="Comma-separated tags, e.g. AI, Python, Beginner")
+    website       = models.URLField(blank=True, help_text="External event website or registration link.")
+    # Accent hex color for the event banner, e.g. #5B4CF5
+    cover_color   = models.CharField(max_length=7, blank=True, default="", help_text="Banner accent colour as hex, e.g. #5B4CF5")
+    # External image URL for the event banner/cover
+    cover_image   = models.URLField(blank=True, help_text="URL of a banner/cover image for the event.")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -161,6 +191,16 @@ class Event(models.Model):
 
     def __str__(self):
         return self.name
+
+    def tag_list(self):
+        """Return tags as a clean list, stripping whitespace."""
+        return [t.strip() for t in self.tags.split(",") if t.strip()] if self.tags else []
+
+    def banner_style(self):
+        """CSS background style for the event banner."""
+        if self.cover_color:
+            return f"background: linear-gradient(135deg, {self.cover_color}cc, {self.cover_color});"
+        return ""
 
     def clean(self):
         """Prevent allocating more capacity than the venue physically holds."""

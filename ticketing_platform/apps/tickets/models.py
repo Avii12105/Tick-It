@@ -36,9 +36,11 @@ class TicketType(models.Model):
     name           = models.CharField(max_length=100)
     price          = models.DecimalField(max_digits=10, decimal_places=2)
     quantity_total = models.PositiveIntegerField()
-    # Incremented atomically during checkout — never decremented on refund
-    # (refunds use the Ticket.status field instead).
     quantity_sold  = models.PositiveIntegerField(default=0)
+    # Short description shown on the tier card.
+    description    = models.CharField(max_length=300, blank=True, help_text="One-line description, e.g. 'Standard entry with cash bar access'.")
+    # Newline-separated list of benefits shown as bullet points on the tier card.
+    benefits       = models.TextField(blank=True, help_text="One benefit per line, e.g.\nAccess to main floor\nCash bar\nFree T-shirt")
 
     class Meta:
         ordering = ("price", "name")
@@ -52,6 +54,10 @@ class TicketType(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.event.name})"
+
+    def benefit_list(self):
+        """Return benefits as a clean list of strings."""
+        return [b.strip() for b in self.benefits.splitlines() if b.strip()] if self.benefits else []
 
     def reserved_count(self):
         """

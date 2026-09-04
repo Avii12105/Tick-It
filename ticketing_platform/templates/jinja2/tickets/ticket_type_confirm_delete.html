@@ -24,7 +24,7 @@
       Any active reservations for this tier will be affected. This cannot be undone.
     </p>
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       <div class="form-actions">
         <button type="submit" class="btn btn-danger">Delete tier</button>
         <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">Cancel</a>
@@ -32,3 +32,4 @@
     </form>
   </div>
 {% endblock %}
+

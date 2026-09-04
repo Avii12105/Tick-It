@@ -54,7 +54,7 @@
           <span class="nav-user__role nav-user__role--{{ user.profile.role }}">{{ user.profile.get_role_display() }}</span>
         </div>
         <form method="post" action="{{ url('accounts:logout') }}" class="inline">
-          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+          {{ csrf_input }}
           <button type="submit" class="btn btn-ghost btn-sm">Logout</button>
         </form>
       </div>
@@ -62,3 +62,4 @@
 
   </div>
 </nav>
+

@@ -22,7 +22,7 @@
       This will fail if any events are still attached — remove or reassign them first.
     </p>
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       <div class="form-actions">
         <button type="submit" class="btn btn-danger">Delete venue</button>
         <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-secondary">Cancel</a>
@@ -30,3 +30,4 @@
     </form>
   </div>
 {% endblock %}
+

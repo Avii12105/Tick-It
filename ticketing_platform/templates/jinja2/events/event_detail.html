@@ -87,7 +87,7 @@
                     {% if available > 0 %}
                       {% if user.is_authenticated %}
                         <form method="post" action="{{ url('tickets:add_to_cart') }}" class="inline">
-                          <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                          {{ csrf_input }}
                           <input type="hidden" name="ticket_type" value="{{ tt.pk }}">
                           <input class="qty-input" type="number" name="quantity" value="1" min="1" max="{{ available }}" aria-label="Quantity">
                           <button type="submit" class="btn btn-primary btn-sm">Reserve</button>
@@ -126,3 +126,4 @@
     <a href="{{ url('events:home') }}" class="btn btn-secondary">← All Events</a>
   </div>
 {% endblock %}
+

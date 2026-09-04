@@ -1,11 +1,10 @@
 {% extends "base/layout.html" %}
-
 {% block title %}{{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
     <a href="{{ url('events:organizer_event_list') }}">My Events</a>
-    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">{{ event.name }}</span>
   </nav>
 
@@ -13,36 +12,35 @@
     <div class="page-header">
       <p class="page-header__eyebrow">{{ event.venue.name }}</p>
       <h1 class="page-header__title">{{ event.name }}</h1>
-      <p class="page-header__sub">{{ event.date.strftime('%A, %B %d, %Y · %I:%M %p') }}</p>
+      <p class="page-header__sub">{{ event.date.strftime('%A, %B %-d, %Y · %-I:%M %p') }}</p>
     </div>
-    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start;">
-      <a href="{{ url('events:event_update', event.pk) }}" class="btn btn-secondary">Edit event</a>
-      <a href="{{ url('events:organizer_event_list') }}" class="btn btn-ghost">← Back</a>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+      <a href="{{ url('events:event_update', event.pk) }}"    class="btn btn-secondary btn-sm">Edit</a>
+      <a href="{{ url('events:organizer_event_list') }}"      class="btn btn-ghost btn-sm">← Back</a>
     </div>
   </div>
 
-  {# Stats #}
   {%- set pct = ((used_capacity / event.allocated_capacity) * 100) | int if event.allocated_capacity > 0 else 0 -%}
-  <div class="stat-row" style="margin-bottom:1.5rem;">
+  <div class="stat-row mb-3">
     <div class="stat-card">
       <p class="stat-card__label">Status</p>
       <p class="stat-card__value" style="font-size:1rem;margin-top:4px;">
         <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
       </p>
     </div>
-    <div class="stat-card stat-card--violet">
-      <p class="stat-card__label">Tiers allocated</p>
+    <div class="stat-card stat-card--accent">
+      <p class="stat-card__label">Allocated</p>
       <p class="stat-card__value">{{ used_capacity }}</p>
-      <p class="stat-card__sub">of {{ event.allocated_capacity }} total</p>
+      <p class="stat-card__sub">of {{ event.allocated_capacity }}</p>
     </div>
     <div class="stat-card">
-      <p class="stat-card__label">Venue capacity</p>
+      <p class="stat-card__label">Venue cap</p>
       <p class="stat-card__value">{{ event.venue.max_capacity }}</p>
     </div>
     <div class="stat-card{% if pct >= 90 %} stat-card--red{% elif pct >= 65 %} stat-card--amber{% else %} stat-card--green{% endif %}">
-      <p class="stat-card__label">Capacity used</p>
+      <p class="stat-card__label">Fill rate</p>
       <p class="stat-card__value">{{ pct }}%</p>
-      <div class="capacity-bar" style="width:100%;margin-top:6px;">
+      <div class="capacity-bar" style="margin-top:6px;">
         <div class="capacity-bar__fill{% if pct >= 90 %} capacity-bar__fill--full{% elif pct >= 65 %} capacity-bar__fill--warn{% endif %}" style="width:{{ pct }}%;"></div>
       </div>
     </div>
@@ -50,49 +48,40 @@
 
   {% if event.description %}
     <div class="panel mb-3">
-      <p class="section-title" style="margin-bottom:.6rem;">Description</p>
-      <p style="font-size:.875rem;color:var(--text-3);margin:0;line-height:1.7;">{{ event.description }}</p>
+      <p class="section-title" style="margin-bottom:.5rem;">Description</p>
+      <p style="font-size:.875rem;color:var(--t2);margin:0;line-height:1.7;">{{ event.description }}</p>
     </div>
   {% endif %}
 
-  {# Check-In Panel #}
-  {% if user.is_authenticated and user.profile.role == 'organizer' and event.organizer_id == user.id %}
-    <div class="checkin-panel mt-3">
-      <div class="section-header">
-        <h2 class="section-title">Event Check-In</h2>
+  {# Check-in panel #}
+  {% if user.profile.role == 'organizer' and event.organizer_id == user.id %}
+    <div class="panel mb-3">
+      <div class="section-header" style="margin-bottom:.65rem;">
+        <p class="section-title">Check-in</p>
         {% if event.ticket_types.count() > 0 %}
-          <a href="{{ url('events:event_bulk_import', event.pk) }}" class="btn btn-primary btn-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <a href="{{ url('events:event_bulk_import', event.pk) }}" class="btn btn-secondary btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
-            Bulk Import VIP Guests
+            Bulk import CSV
           </a>
         {% endif %}
       </div>
-      <p class="checkin-panel__description">Scan attendee QR codes at the event entrance:</p>
-      <div class="checkin-panel__actions">
+      <p style="font-size:.845rem;color:var(--t3);margin:0 0 .875rem;">Scan attendee QR codes at the door.</p>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
         <a href="{{ url('events:checkin_single', event.pk) }}" class="btn btn-primary btn-sm">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l9-9z"/>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
           </svg>
-          Check In
-        </a>
-        <a href="{{ url('events:checkin_bulk', event.pk) }}" class="btn btn-outline btn-sm">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13"/>
-            <path d="M5 3h14v2H5v-2z"/>
-            <circle cx="9" cy="9" r="2"/>
-            <circle cx="15" cy="15" r="2"/>
-          </svg>
-          Bulk Check-In
+          Check-in scanner
         </a>
       </div>
     </div>
   {% endif %}
 
   {# Ticket tiers #}
-  <div class="section-header mt-3">
-    <h2 class="section-title">Ticket Tiers</h2>
+  <div class="section-header mt-2">
+    <h2 class="section-title">Ticket tiers</h2>
     <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary btn-sm">+ Add tier</a>
   </div>
 
@@ -101,12 +90,7 @@
       <table class="ledger">
         <thead>
           <tr>
-            <th>Tier</th>
-            <th>Price</th>
-            <th>Allocated</th>
-            <th>Sold</th>
-            <th>Available</th>
-            <th>Actions</th>
+            <th>Tier</th><th>Price</th><th>Total</th><th>Sold</th><th>Available</th><th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -118,13 +102,13 @@
               <td class="mono">{{ tt.quantity_total }}</td>
               <td class="mono">{{ tt.quantity_sold }}</td>
               <td class="mono">
-                {% if avail > 0 %}<span style="color:var(--ok);">{{ avail }}</span>
-                {% else %}<span style="color:var(--indigo);">0</span>{% endif %}
+                {% if avail > 0 %}<span class="text-ok">{{ avail }}</span>
+                {% else %}<span class="text-err">0</span>{% endif %}
               </td>
               <td>
                 <div class="ledger__actions">
                   <a href="{{ url('tickets:ticket_type_update', tt.pk) }}" class="btn btn-secondary btn-sm">Edit</a>
-                  <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+                  <a href="{{ url('tickets:ticket_type_delete', tt.pk) }}"  class="btn btn-danger btn-sm">Delete</a>
                 </div>
               </td>
             </tr>
@@ -135,8 +119,8 @@
   {% else %}
     <div class="empty-state" style="padding:2rem 0;">
       <div class="empty-state__icon">🎫</div>
-      <p class="empty-state__title">No ticket tiers yet</p>
-      <p class="empty-state__text">Add tiers to define pricing and availability.</p>
+      <p class="empty-state__title">No tiers yet</p>
+      <p class="empty-state__text">Add a ticket tier to start selling.</p>
       <a href="{{ url('tickets:ticket_type_create', event.pk) }}" class="btn btn-primary btn-sm">+ Add first tier</a>
     </div>
   {% endif %}

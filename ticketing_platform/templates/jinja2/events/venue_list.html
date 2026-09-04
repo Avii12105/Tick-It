@@ -1,27 +1,23 @@
 {% extends "base/layout.html" %}
-
-{% block title %}My Venues · TickIt{% endblock %}
+{% block title %}Venues · TickIt{% endblock %}
 
 {% block content %}
   <div class="page-header-row">
     <div class="page-header">
-      <p class="page-header__eyebrow">Back office</p>
+      <p class="page-header__eyebrow">Organizer</p>
       <h1 class="page-header__title">My Venues</h1>
-      <p class="page-header__sub">Venues are reusable across multiple events.</p>
     </div>
-    {% if venues %}
-      <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
-    {% endif %}
+    <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New venue</a>
   </div>
 
   {% if venues %}
     <div class="venue-cards">
       {% for venue in venues %}
         <div class="venue-card">
-          <div>
-            <p class="venue-card__name">{{ venue.name }}</p>
-            <p class="venue-card__address">{{ venue.address if venue.address else 'No address set' }}</p>
-          </div>
+          <p class="venue-card__name">{{ venue.name }}</p>
+          <p class="venue-card__address">
+            {% if venue.address %}{{ venue.address }}{% else %}<span style="color:var(--t4);">No address set</span>{% endif %}
+          </p>
           <div class="venue-card__cap">
             <span class="venue-card__cap-label">Max capacity</span>
             <span class="venue-card__cap-value">{{ venue.max_capacity }}</span>
@@ -38,8 +34,8 @@
     <div class="empty-state">
       <div class="empty-state__icon">📍</div>
       <p class="empty-state__title">No venues yet</p>
-      <p class="empty-state__text">Create a venue before you can create events.</p>
-      <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New Venue</a>
+      <p class="empty-state__text">Create a venue before creating events.</p>
+      <a href="{{ url('events:venue_create') }}" class="btn btn-primary">+ New venue</a>
     </div>
   {% endif %}
 {% endblock %}

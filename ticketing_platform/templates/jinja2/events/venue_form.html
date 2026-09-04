@@ -1,16 +1,15 @@
 {% extends "base/layout.html" %}
-
 {% block title %}{{ title }} · TickIt{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
-    <a href="{{ url('events:venue_list') }}">My Venues</a>
-    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <a href="{{ url('events:venue_list') }}">Venues</a>
+    <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">{{ title }}</span>
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">Back office</p>
+    <p class="page-header__eyebrow">Organizer</p>
     <h1 class="page-header__title">{{ title }}</h1>
   </div>
 
@@ -28,16 +27,14 @@
         </div>
       </form>
     </div>
-
     <aside class="form-hint">
       <p class="form-hint__title">Tips</p>
-      <ul style="padding:0;margin:0;">
-        <li>Venues are reusable — create once, attach to many events.</li>
-        <li>Max capacity caps all events held at this venue.</li>
-        <li>You cannot lower capacity below what's already allocated by existing events.</li>
+      <ul>
+        <li>Venues are reusable across multiple events.</li>
+        <li>Max capacity caps all events at this venue.</li>
+        <li>You cannot reduce capacity below what existing events have allocated.</li>
         <li>A venue with active events cannot be deleted.</li>
       </ul>
     </aside>
   </div>
 {% endblock %}
-

@@ -1,11 +1,10 @@
 {% extends "base/layout.html" %}
-
 {% block title %}Ticket · {{ ticket.event.name }} · TickIt{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
     <a href="{{ url('tickets:my_tickets') }}">My Tickets</a>
-    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">{{ ticket.event.name }}</span>
   </nav>
 
@@ -14,179 +13,134 @@
     <h1 class="page-header__title">Your Ticket</h1>
   </div>
 
-  <div id="checkin-live-alert" style="display:{% if ticket.checked_in_at or ticket.status == 'checked_in' %}flex{% else %}none{% endif %}; align-items:center; gap:10px; background:var(--ok-bg); color:var(--ok); border:1px solid rgba(26,107,58,0.25); border-radius:var(--radius-sm); padding:12px 18px; margin-bottom:1.5rem; font-size:.875rem; font-weight:700;">
-    <span style="font-size:1.15rem;line-height:1;">✓</span>
-    <span id="checkin-live-text">This ticket has been checked in for entry.</span>
+  {# Live check-in alert — hidden until triggered #}
+  <div id="checkin-alert"
+       style="display:{% if ticket.checked_in_at %}flex{% else %}none{% endif %};align-items:center;gap:10px;background:var(--ok-pale);color:var(--ok);border:1px solid #BBF7D0;border-radius:var(--r);padding:12px 16px;margin-bottom:1.5rem;font-size:.875rem;font-weight:600;">
+    <span>✓</span>
+    <span>This ticket has been checked in.</span>
   </div>
 
-  <div class="pass-layout" style="margin-bottom:2rem;">
-    <div class="pass-layout__divider" aria-hidden="true"></div>
+  <div class="pass-layout" style="margin-bottom:2rem;position:relative;">
 
-    <span id="pass-stamp" class="pass-stamp {% if ticket.checked_in_at or ticket.status == 'checked_in' %}pass-stamp--checkedin{% else %}pass-stamp--valid{% endif %}" aria-hidden="true">
-      {% if ticket.checked_in_at or ticket.status == 'checked_in' %}Checked in{% else %}Valid{% endif %}
+    {# Stamp — updated by JS on check-in #}
+    <span id="pass-stamp"
+          class="pass-stamp {% if ticket.checked_in_at %}pass-stamp--checkedin{% else %}pass-stamp--valid{% endif %}"
+          aria-hidden="true">
+      {% if ticket.checked_in_at %}Checked in{% else %}Valid{% endif %}
     </span>
 
+    {# Info side #}
     <div class="pass-layout__info">
-      <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--indigo);margin:0 0 4px;">
+      <p style="font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin:0 0 4px;">
         {{ ticket.ticket_type.name }}
       </p>
-      <p style="font-family:var(--font-display);font-size:1.25rem;font-weight:700;color:var(--text-1);line-height:1.2;margin:0 0 10px;">
+      <p style="font-size:1.2rem;font-weight:800;color:var(--t1);line-height:1.25;margin:0 0 10px;letter-spacing:-.02em;">
         {{ ticket.event.name }}
       </p>
 
       <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px;">
-        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
-          {{ ticket.event.date.strftime('%A, %B %d, %Y') }}
-        </span>
-        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
-          {{ ticket.event.date.strftime('%I:%M %p') }}
-        </span>
-        <span style="font-size:.75rem;font-weight:600;color:var(--text-3);">
-          {{ ticket.event.venue.name }}{% if ticket.event.venue.address %} · {{ ticket.event.venue.address }}{% endif %}
-        </span>
+        <span style="font-size:.8rem;color:var(--t2);font-weight:500;">{{ ticket.event.date.strftime('%A, %B %-d, %Y') }}</span>
+        <span style="font-size:.8rem;color:var(--t2);font-weight:500;">{{ ticket.event.date.strftime('%-I:%M %p') }}</span>
+        <span style="font-size:.8rem;color:var(--t3);">{{ ticket.event.venue.name }}{% if ticket.event.venue.address %} · {{ ticket.event.venue.address }}{% endif %}</span>
       </div>
 
-      <div style="border-top:1px solid rgba(61,43,34,0.1);padding-top:12px;display:flex;gap:1.5rem;flex-wrap:wrap;">
+      <div style="border-top:1px solid var(--border);padding-top:12px;display:flex;gap:1.5rem;flex-wrap:wrap;">
         <div>
-          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Status</p>
-          <span id="ticket-status-badge" class="badge badge-{{ 'checked_in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.status }}">
-            {{ 'Checked in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.get_status_display() }}
+          <p style="font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t4);margin:0 0 3px;">Status</p>
+          <span id="status-badge" class="badge badge-{% if ticket.checked_in_at %}checked_in{% else %}{{ ticket.status }}{% endif %}">
+            {% if ticket.checked_in_at %}Checked in{% else %}{{ ticket.get_status_display() }}{% endif %}
           </span>
         </div>
-        <div id="checked-in-time-container" style="{% if not ticket.checked_in_at %}display:none;{% endif %}">
-          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Checked In</p>
-          <p id="checked-in-time" style="font-size:.82rem;font-weight:700;color:var(--ok);margin:0;">
-            {{ ticket.checked_in_at.strftime('%b %d, %Y · %I:%M %p') if ticket.checked_in_at else '' }}
+        <div id="checkin-time-wrap" style="{% if not ticket.checked_in_at %}display:none;{% endif %}">
+          <p style="font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t4);margin:0 0 3px;">Scanned</p>
+          <p id="checkin-time" style="font-size:.82rem;font-weight:600;color:var(--ok);margin:0;">
+            {{ ticket.checked_in_at.strftime('%b %-d · %-I:%M %p') if ticket.checked_in_at else '' }}
           </p>
         </div>
         <div>
-          <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 3px;">Purchased</p>
-          <p style="font-size:.82rem;font-weight:700;color:var(--text-1);margin:0;">
-            {{ ticket.purchased_at.strftime('%b %d, %Y') }}
-          </p>
+          <p style="font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t4);margin:0 0 3px;">Purchased</p>
+          <p style="font-size:.82rem;font-weight:600;color:var(--t1);margin:0;">{{ ticket.purchased_at.strftime('%b %-d, %Y') }}</p>
         </div>
       </div>
 
       <div style="margin-top:12px;">
-        <p style="font-size:.62rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-3);margin:0 0 4px;">Ticket code</p>
-        <code style="font-size:.72rem;color:var(--text-3);word-break:break-all;">{{ ticket.unique_code }}</code>
+        <p style="font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--t4);margin:0 0 3px;">Ticket code</p>
+        <code style="font-size:.72rem;color:var(--t3);word-break:break-all;">{{ ticket.unique_code }}</code>
       </div>
     </div>
 
+    {# QR stub #}
     <div class="pass-layout__stub">
       {% if ticket.qr_image %}
-        <img class="pass-layout__qr" src="{{ ticket.qr_image.url }}" alt="QR code">
+        <img class="pass-layout__qr" src="{{ ticket.qr_image.url }}" alt="QR code for entry">
         <span class="pass-layout__code">{{ ticket.unique_code[:14] }}…</span>
       {% else %}
-        <div style="width:110px;height:110px;border:2px dashed rgba(255,248,238,.3);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;">
-          <span style="font-size:.58rem;color:rgba(255,248,238,.5);text-align:center;padding:8px;font-weight:700;">QR<br>pending</span>
+        <div style="width:120px;height:120px;border:1.5px dashed rgba(255,255,255,.25);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:.62rem;color:rgba(255,255,255,.4);text-align:center;padding:8px;font-weight:600;">QR<br>generating…</span>
         </div>
       {% endif %}
-      <span id="stub-status-badge" class="badge badge-{{ 'checked_in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.status }}" style="margin-top:4px;">
-        {{ 'Checked in' if ticket.checked_in_at or ticket.status == 'checked_in' else ticket.get_status_display() }}
+      <span id="stub-badge" class="badge badge-{% if ticket.checked_in_at %}checked_in{% else %}{{ ticket.status }}{% endif %}" style="margin-top:4px;">
+        {% if ticket.checked_in_at %}Checked in{% else %}{{ ticket.get_status_display() }}{% endif %}
       </span>
     </div>
+
   </div>
 
-  <a href="{{ url('tickets:my_tickets') }}" class="btn btn-secondary">← My Tickets</a>
+  <a href="{{ url('tickets:my_tickets') }}" class="btn btn-secondary btn-sm">← My Tickets</a>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-(function() {
-  const ticketId = {{ ticket.pk }};
-  const uniqueCode = {{ ticket.unique_code | tojson }};
-  let isCheckedIn = {{ 'true' if ticket.checked_in_at or ticket.status == 'checked_in' else 'false' }};
-  let pollTimer = null;
+(function () {
+  const ticketId  = {{ ticket.pk }};
+  const code      = {{ ticket.unique_code | tojson }};
+  let done        = {{ 'true' if ticket.checked_in_at else 'false' }};
 
-  function updateToCheckedIn(checkedInAtStr) {
-    if (isCheckedIn) return;
-    isCheckedIn = true;
+  function markCheckedIn(timeStr) {
+    if (done) return;
+    done = true;
 
-    // 1. Update pass stamp
     const stamp = document.getElementById('pass-stamp');
-    if (stamp) {
-      stamp.className = 'pass-stamp pass-stamp--checkedin stamp-animate';
-      stamp.textContent = 'Checked in';
-    }
+    if (stamp) { stamp.className = 'pass-stamp pass-stamp--checkedin stamp-animate'; stamp.textContent = 'Checked in'; }
 
-    // 2. Update status badges
-    const statusBadge = document.getElementById('ticket-status-badge');
-    if (statusBadge) {
-      statusBadge.className = 'badge badge-checked_in badge-pulse';
-      statusBadge.textContent = 'Checked in';
-    }
+    ['status-badge', 'stub-badge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.className = 'badge badge-checked_in badge-pulse'; el.textContent = 'Checked in'; }
+    });
 
-    const stubBadge = document.getElementById('stub-status-badge');
-    if (stubBadge) {
-      stubBadge.className = 'badge badge-checked_in badge-pulse';
-      stubBadge.textContent = 'Checked in';
-    }
+    const tw = document.getElementById('checkin-time-wrap');
+    const tt = document.getElementById('checkin-time');
+    if (tw) tw.style.display = '';
+    if (tt && timeStr) tt.textContent = timeStr;
 
-    // 3. Show checked-in timestamp
-    const timeContainer = document.getElementById('checked-in-time-container');
-    const timeText = document.getElementById('checked-in-time');
-    if (timeContainer && timeText) {
-      if (checkedInAtStr) {
-        timeText.textContent = checkedInAtStr;
-      }
-      timeContainer.style.display = '';
-    }
+    const alert = document.getElementById('checkin-alert');
+    if (alert) alert.style.display = 'flex';
 
-    // 4. Show success banner
-    const notification = document.getElementById('checkin-live-alert');
-    if (notification) {
-      notification.style.display = 'flex';
-      notification.classList.add('badge-pulse');
-    }
-
-    // Stop polling
-    if (pollTimer) {
-      clearInterval(pollTimer);
-      pollTimer = null;
-    }
+    clearInterval(timer);
   }
 
-  // API polling
-  async function pollStatus() {
-    if (isCheckedIn) return;
-    try {
-      const response = await fetch('{{ url("tickets:ticket_status", ticket.pk) }}', {
-        headers: { 'Accept': 'application/json' }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.is_checked_in || data.status === 'checked_in') {
-          updateToCheckedIn(data.checked_in_at);
-        }
-      }
-    } catch (e) {}
-  }
-
-  // Cross-tab broadcast listener
+  /* BroadcastChannel */
   try {
-    const channel = new BroadcastChannel('tickit_checkin');
-    channel.onmessage = function(e) {
-      if (e.data && (e.data.ticket_id == ticketId || e.data.unique_code === uniqueCode)) {
-        updateToCheckedIn(e.data.checked_in_at);
-      }
-    };
-  } catch(e) {}
+    const ch = new BroadcastChannel('tickit_checkin');
+    ch.onmessage = e => { if (e.data && (e.data.ticket_id == ticketId || e.data.unique_code === code)) markCheckedIn(e.data.checked_in_at); };
+  } catch (_) {}
 
-  window.addEventListener('storage', function(e) {
+  /* localStorage fallback */
+  window.addEventListener('storage', e => {
     if (e.key === 'tickit_last_checkin') {
-      try {
-        const data = JSON.parse(e.newValue);
-        if (data && (data.ticket_id == ticketId || data.unique_code === uniqueCode)) {
-          updateToCheckedIn(data.checked_in_at);
-        }
-      } catch (err) {}
+      try { const d = JSON.parse(e.newValue); if (d && (d.ticket_id == ticketId || d.unique_code === code)) markCheckedIn(d.checked_in_at); } catch (_) {}
     }
   });
 
-  if (!isCheckedIn) {
-    pollTimer = setInterval(pollStatus, 2500);
-  }
+  /* Polling */
+  const timer = !done ? setInterval(async () => {
+    try {
+      const r = await fetch('{{ url("tickets:ticket_status", ticket.pk) }}', { headers: { Accept: 'application/json' } });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (d.is_checked_in) markCheckedIn(d.checked_in_at);
+    } catch (_) {}
+  }, 3000) : null;
 })();
 </script>
 {% endblock %}

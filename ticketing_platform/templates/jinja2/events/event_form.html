@@ -1,16 +1,15 @@
 {% extends "base/layout.html" %}
-
 {% block title %}{{ title }} · TickIt{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
     <a href="{{ url('events:organizer_event_list') }}">My Events</a>
-    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">{{ title }}</span>
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">Back office</p>
+    <p class="page-header__eyebrow">Organizer</p>
     <h1 class="page-header__title">{{ title }}</h1>
   </div>
 
@@ -28,16 +27,13 @@
         </div>
       </form>
     </div>
-
     <aside class="form-hint">
       <p class="form-hint__title">Tips</p>
-      <ul style="padding:0;margin:0;">
-        <li>Give the event a clear, searchable name.</li>
-        <li>Allocated capacity must not exceed the venue's max capacity.</li>
-        <li>Set status to <strong style="color:var(--indigo);">Draft</strong> while you're setting up — publish when ready.</li>
+      <ul>
+        <li>Set status to <strong>Draft</strong> while preparing — publish when ready.</li>
+        <li>Allocated capacity cannot exceed the venue's max capacity.</li>
         <li>Add ticket tiers after saving the event.</li>
       </ul>
     </aside>
   </div>
 {% endblock %}
-

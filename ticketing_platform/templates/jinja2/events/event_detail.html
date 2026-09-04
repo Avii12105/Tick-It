@@ -1,64 +1,65 @@
 {% extends "base/layout.html" %}
-
 {% block title %}{{ event.name }} · TickIt{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url('events:home') }}">Events</a>
-    <span class="breadcrumb__sep" aria-hidden="true">›</span>
+    <span class="breadcrumb__sep">›</span>
     <span class="breadcrumb__current">{{ event.name }}</span>
   </nav>
 
   <div class="event-layout">
-    {# ---- Main column ---- #}
+
+    {# ── Main column ─────────────────────────────── #}
     <div class="event-layout__main">
-      <div class="boarding-pass">
-        <div class="boarding-pass__body">
-          <p class="boarding-pass__eyebrow">{{ event.venue.name }}</p>
-          <h1 class="boarding-pass__name">{{ event.name }}</h1>
-          <div class="boarding-pass__meta">
-            <span>{{ event.date.strftime('%A, %B %d, %Y') }}</span>
+
+      <div class="event-banner">
+        <div class="event-banner__top">
+          <p class="event-banner__eyebrow">{{ event.venue.name }}</p>
+          <h1 class="event-banner__name">{{ event.name }}</h1>
+          <div class="event-banner__meta">
+            <span>{{ event.date.strftime('%A, %B %-d, %Y') }}</span>
             <span>{{ event.date.strftime('%I:%M %p') }}</span>
-            <span>{{ event.venue.address if event.venue.address else event.venue.name }}</span>
+            {% if event.venue.address %}<span>{{ event.venue.address }}</span>{% endif %}
           </div>
         </div>
-        <div class="boarding-pass__perf" aria-hidden="true"></div>
-        <div class="boarding-pass__footer">
-          <div class="boarding-pass__stat">
-            <span class="boarding-pass__stat-label">Status</span>
-            <span class="boarding-pass__stat-value">
+        <div class="event-banner__bottom">
+          <div class="event-banner__stat">
+            <span class="event-banner__stat-label">Status</span>
+            <span class="event-banner__stat-value">
               <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
             </span>
           </div>
-          <div class="boarding-pass__stat">
-            <span class="boarding-pass__stat-label">Capacity</span>
-            <span class="boarding-pass__stat-value">{{ event.allocated_capacity }}</span>
+          <div class="event-banner__stat">
+            <span class="event-banner__stat-label">Capacity</span>
+            <span class="event-banner__stat-value">{{ event.allocated_capacity }} seats</span>
           </div>
-          <div class="boarding-pass__stat">
-            <span class="boarding-pass__stat-label">Venue</span>
-            <span class="boarding-pass__stat-value">{{ event.venue.name }}</span>
+          <div class="event-banner__stat">
+            <span class="event-banner__stat-label">Venue</span>
+            <span class="event-banner__stat-value">{{ event.venue.name }}</span>
           </div>
         </div>
       </div>
 
       {% if event.description %}
         <div class="panel mb-3">
-          <p class="section-title" style="margin-bottom:.75rem;">About this event</p>
-          <p style="font-size:.9rem;color:var(--text-3);line-height:1.7;margin:0;">{{ event.description }}</p>
+          <p class="section-title" style="margin-bottom:.65rem;">About</p>
+          <p style="font-size:.9rem;color:var(--t2);line-height:1.75;margin:0;">{{ event.description }}</p>
         </div>
       {% endif %}
+
     </div>
 
-    {# ---- Aside: purchase panel ---- #}
+    {# ── Aside: purchase panel ────────────────────── #}
     <aside class="event-layout__aside">
       <div class="purchase-panel">
         <div class="purchase-panel__header">
           <p class="purchase-panel__title">Select tickets</p>
           {% if ticket_types %}
-            {%- set ns2 = namespace(total=0) -%}
-            {%- for tt in ticket_types -%}{%- set ns2.total = ns2.total + tt.available_count() -%}{%- endfor -%}
-            {% if ns2.total > 0 %}
-              <span class="badge badge-active">{{ ns2.total }} available</span>
+            {%- set ns2 = namespace(tot=0) -%}
+            {%- for tt in ticket_types -%}{%- set ns2.tot = ns2.tot + tt.available_count() -%}{%- endfor -%}
+            {% if ns2.tot > 0 %}
+              <span class="badge badge-active">{{ ns2.tot }} available</span>
             {% else %}
               <span class="badge badge-cancelled">Sold out</span>
             {% endif %}
@@ -67,9 +68,9 @@
 
         <div class="purchase-panel__body">
           {% if ticket_types %}
-            <div class="tier-list" style="border:none;border-radius:0;">
+            <div class="tier-list">
               {% for tt in ticket_types %}
-                {% set available = tt.available_count() %}
+                {% set avail = tt.available_count() %}
                 <div class="tier-row{% if loop.first %} tier-row--featured{% endif %}">
                   <div>
                     <p class="tier-row__name" style="margin:0;">{{ tt.name }}</p>
@@ -78,32 +79,33 @@
                     {% endif %}
                   </div>
                   <span class="tier-row__price">₹{{ tt.price }}</span>
-                  {% if available > 0 %}
-                    <span class="tier-row__avail tier-row__avail--ok">{{ available }} left</span>
+                  {% if avail > 0 %}
+                    <span class="tier-row__avail tier-row__avail--ok">{{ avail }} left</span>
                   {% else %}
                     <span class="tier-row__avail tier-row__avail--out">Sold out</span>
                   {% endif %}
                   <div class="tier-row__action">
-                    {% if available > 0 %}
+                    {% if avail > 0 %}
                       {% if user.is_authenticated %}
                         <form method="post" action="{{ url('tickets:add_to_cart') }}" class="inline">
                           {{ csrf_input }}
                           <input type="hidden" name="ticket_type" value="{{ tt.pk }}">
-                          <input class="qty-input" type="number" name="quantity" value="1" min="1" max="{{ available }}" aria-label="Quantity">
+                          <input class="qty-input" type="number" name="quantity" value="1" min="1" max="{{ avail }}" aria-label="Quantity">
                           <button type="submit" class="btn btn-primary btn-sm">Reserve</button>
                         </form>
                       {% else %}
-                        <a href="{{ url('accounts:login') }}?next={{ url('events:public_event_detail', event.pk) }}" class="btn btn-primary btn-sm">Login</a>
+                        <a href="{{ url('accounts:login') }}?next={{ url('events:public_event_detail', event.pk) }}" class="btn btn-primary btn-sm">Log in</a>
                       {% endif %}
                     {% else %}
-                      <span style="font-family:var(--font-mono);font-size:.62rem;color:var(--danger);letter-spacing:.04em;">SOLD OUT</span>
+                      <span style="font-size:.75rem;font-weight:600;color:var(--err);">Sold out</span>
                     {% endif %}
-                  </div>                </div>
+                  </div>
+                </div>
               {% endfor %}
             </div>
           {% else %}
             <div style="padding:1.5rem 20px;">
-              <p style="font-family:var(--font-mono);font-size:.78rem;color:var(--text-3);margin:0;">No tickets available yet.</p>
+              <p style="font-size:.875rem;color:var(--t3);margin:0;">No tickets available yet.</p>
             </div>
           {% endif %}
         </div>
@@ -111,19 +113,19 @@
         {% if ticket_types %}
           <div class="purchase-panel__footer">
             {% if user.is_authenticated %}
-              <a href="{{ url('tickets:cart') }}" class="btn btn-secondary btn-sm" style="width:100%;justify-content:center;">View cart</a>
+              <a href="{{ url('tickets:cart') }}" class="btn btn-secondary btn-sm btn-block">View cart</a>
             {% else %}
-              <a href="{{ url('accounts:signup') }}" class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;">Sign up to reserve</a>
+              <a href="{{ url('accounts:signup') }}" class="btn btn-accent-outline btn-sm btn-block">Sign up to reserve</a>
             {% endif %}
-            <p class="purchase-panel__note">Tickets held for 10 minutes once reserved.</p>
+            <p class="purchase-panel__note">Held for 10 minutes after reserving.</p>
           </div>
         {% endif %}
       </div>
     </aside>
+
   </div>
 
   <div class="mt-3">
-    <a href="{{ url('events:home') }}" class="btn btn-secondary">← All Events</a>
+    <a href="{{ url('events:home') }}" class="btn btn-ghost btn-sm">← All events</a>
   </div>
 {% endblock %}
-

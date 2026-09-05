@@ -42,7 +42,7 @@ def venue_list(request):
 @organizer_required
 def venue_create(request):
     if request.method == "POST":
-        form = VenueForm(request.POST)
+        form = VenueForm(request.POST, request.FILES)
         if form.is_valid():
             venue = form.save(commit=False)
             venue.owner = request.user
@@ -69,7 +69,7 @@ def venue_detail(request, pk):
 def venue_update(request, pk):
     venue = get_object_or_404(Venue, pk=pk, owner=request.user)
     if request.method == "POST":
-        form = VenueForm(request.POST, instance=venue)
+        form = VenueForm(request.POST, request.FILES, instance=venue)
         if form.is_valid():
             form.save()
             messages.success(request, f"Venue '{venue.name}' updated.")
@@ -121,7 +121,7 @@ def organizer_event_detail(request, pk):
 @organizer_required
 def event_create(request):
     if request.method == "POST":
-        form = EventForm(request.POST, organizer=request.user)
+        form = EventForm(request.POST, request.FILES, organizer=request.user)
         if form.is_valid():
             event = form.save(commit=False)
             event.organizer = request.user
@@ -137,7 +137,7 @@ def event_create(request):
 def event_update(request, pk):
     event = get_object_or_404(Event, pk=pk, organizer=request.user)
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event, organizer=request.user)
+        form = EventForm(request.POST, request.FILES, instance=event, organizer=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, f"Event '{event.name}' updated.")

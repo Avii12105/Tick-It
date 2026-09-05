@@ -1,16 +1,36 @@
 {% extends "base/layout.html" %}
 
-{% block title %}My Cart · TickIt{% endblock %}
+{% block title %}Checkout &amp; Cart · TickIt{% endblock %}
 
 {% block content %}
   <div class="page-header">
-    <p class="page-header__eyebrow">Checkout</p>
-    <h1 class="page-header__title">My Cart</h1>
+    <p class="page-header__eyebrow">ORDER LEDGER // 10-MINUTE HOLD</p>
+    <h1 class="page-header__title">YOUR CART &amp; RESERVATION</h1>
   </div>
 
   {% if reservations %}
-    {%- set ns = namespace(grand_total=0) -%}
-    {%- for r in reservations -%}{%- set ns.grand_total = ns.grand_total + (r.ticket_type.price * r.quantity) -%}{%- endfor -%}
+    {%- set ns = namespace(grand_total=0, min_expiry=None) -%}
+    {%- for r in reservations -%}
+      {%- set ns.grand_total = ns.grand_total + (r.ticket_type.price * r.quantity) -%}
+      {%- if ns.min_expiry is none or r.expires_at < ns.min_expiry -%}
+        {%- set ns.min_expiry = r.expires_at -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <!-- Reservation Countdown Box (§38, §39) -->
+    <div class="countdown-box" id="countdown-box" data-expiry="{{ ns.min_expiry.isoformat() if ns.min_expiry else '' }}">
+      <div class="countdown-box__label">
+        <span class="countdown-box__title" id="countdown-heading">ACTIVE HOLD COUNTDOWN</span>
+        <span class="countdown-box__sub">TICKETS ARE SECURED. COMPLETE CHECKOUT BEFORE TIMER EXPIRES.</span>
+      </div>
+      <div class="countdown-digits-wrap" id="countdown-digits-wrap">
+        <div class="countdown-digit" id="cd-m1">0</div>
+        <div class="countdown-digit" id="cd-m2">9</div>
+        <span class="countdown-colon">:</span>
+        <div class="countdown-digit" id="cd-s1">5</div>
+        <div class="countdown-digit" id="cd-s2">9</div>
+      </div>
+    </div>
 
     <div class="cart-layout">
       <div class="cart-layout__main">
@@ -18,39 +38,41 @@
           <table class="ledger">
             <thead>
               <tr>
-                <th>Event</th>
-                <th>Tier</th>
-                <th>Qty</th>
-                <th>Price each</th>
-                <th>Subtotal</th>
-                <th>Hold expires</th>
-                <th></th>
+                <th>EVENT</th>
+                <th>TIER</th>
+                <th>QTY</th>
+                <th>PRICE</th>
+                <th>SUBTOTAL</th>
+                <th>HOLD UNTIL</th>
+                <th>ACTION</th>
               </tr>
             </thead>
             <tbody>
               {% for r in reservations %}
                 <tr>
                   <td>
-                    <a href="{{ url('events:public_event_detail', r.ticket_type.event_id) }}" style="font-weight:700;color:var(--text-1);">
+                    <a href="{{ url('events:public_event_detail', r.ticket_type.event_id) }}" style="font-weight:700;color:var(--ink);">
                       {{ r.ticket_type.event.name }}
                     </a>
-                    <p style="font-size:.68rem;color:var(--text-3);font-weight:600;margin:2px 0 0;">
-                      {{ r.ticket_type.event.date.strftime('%b %d, %Y') }}
-                    </p>
+                    <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--ink-muted);margin-top:2px;">
+                      {{ r.ticket_type.event.date.strftime('%b %d, %Y · %I:%M %p') }}
+                    </div>
                   </td>
-                  <td style="font-size:.85rem;font-weight:600;">{{ r.ticket_type.name }}</td>
+                  <td>
+                    <span class="badge badge-valid">{{ r.ticket_type.name }}</span>
+                  </td>
                   <td class="mono">{{ r.quantity }}</td>
                   <td class="mono">₹{{ r.ticket_type.price }}</td>
-                  <td class="mono" style="color:var(--indigo);font-weight:800;">₹{{ (r.ticket_type.price * r.quantity) }}</td>
-                  <td>
-                    <span style="font-size:.75rem;color:var(--indigo);font-weight:800;">
-                      {{ r.expires_at.strftime('%I:%M %p') }}
-                    </span>
+                  <td class="mono" style="color:var(--orange-dark);font-weight:800;font-size:1.1rem;">
+                    ₹{{ (r.ticket_type.price * r.quantity) }}
+                  </td>
+                  <td class="mono" style="font-size:0.8rem;">
+                    {{ r.expires_at.strftime('%I:%M %p') }}
                   </td>
                   <td>
                     <form method="post" action="{{ url('tickets:remove_from_cart', r.pk) }}" class="inline">
-                      {{ csrf_input }}
-                      <button type="submit" class="btn btn-ghost btn-sm">Remove</button>
+                      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                      <button type="submit" class="btn btn-ghost btn-sm" style="color:var(--red);">REMOVE</button>
                     </form>
                   </td>
                 </tr>
@@ -58,33 +80,38 @@
             </tbody>
           </table>
         </div>
+
+        <div class="mt-4">
+          <a href="{{ url('events:home') }}" class="btn btn-secondary">← KEEP BROWSING</a>
+        </div>
       </div>
 
-      <aside>
+      <!-- Order Summary Aside -->
+      <aside class="cart-layout__aside">
         <div class="cart-summary">
-          <p class="cart-summary__title">Order summary</p>
+          <h3 class="cart-summary__title">ORDER SUMMARY</h3>
 
           {% for r in reservations %}
             <div class="cart-summary__line">
               <span>{{ r.ticket_type.event.name }} &times; {{ r.quantity }}</span>
-              <strong>₹{{ (r.ticket_type.price * r.quantity) }}</strong>
+              <strong class="mono">₹{{ (r.ticket_type.price * r.quantity) }}</strong>
             </div>
           {% endfor %}
 
           <div class="cart-summary__total">
-            <span class="cart-summary__total-label">Total</span>
-            <span class="cart-summary__total-value">₹{{ ns.grand_total }}</span>
+            <span>TOTAL DUE</span>
+            <span class="mono" style="color:var(--orange-dark);">₹{{ ns.grand_total }}</span>
           </div>
 
-          <form method="post" action="{{ url('tickets:checkout') }}" style="margin-top:1rem;">
-            {{ csrf_input }}
-            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
-              Checkout
+          <form method="post" action="{{ url('tickets:checkout') }}" style="margin-top:var(--space-4);">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+              COMPLETE CHECKOUT ➔
             </button>
           </form>
 
-          <p style="font-size:.62rem;font-weight:600;color:var(--text-4);text-align:center;margin-top:.75rem;letter-spacing:.02em;">
-            Holds expire 10 min after reservation
+          <p style="font-family:var(--font-mono);font-size:0.68rem;font-weight:700;color:var(--ink-muted);text-align:center;margin-top:var(--space-3);letter-spacing:0.04em;">
+            ✦ IMMEDIATE DIGITAL PASS ISSUANCE WITH QR CODE ✦
           </p>
         </div>
       </aside>
@@ -93,10 +120,61 @@
   {% else %}
     <div class="empty-state">
       <div class="empty-state__icon">🛒</div>
-      <p class="empty-state__title">Your cart is empty</p>
-      <p class="empty-state__text">Find an event and reserve your tickets.</p>
-      <a href="{{ url('events:home') }}" class="btn btn-primary">Browse events</a>
+      <h2 class="empty-state__title">YOUR CART IS CURRENTLY EMPTY.</h2>
+      <p class="empty-state__text">Discover events on the board and reserve your entry passes.</p>
+      <a href="{{ url('events:home') }}" class="btn btn-primary">DISCOVER EVENTS →</a>
     </div>
   {% endif %}
 {% endblock %}
 
+{% block extra_scripts %}
+<script>
+(function() {
+  const box = document.getElementById('countdown-box');
+  if (!box) return;
+  const expiryStr = box.dataset.expiry;
+  if (!expiryStr) return;
+
+  const expiry = new Date(expiryStr).getTime();
+  const m1 = document.getElementById('cd-m1');
+  const m2 = document.getElementById('cd-m2');
+  const s1 = document.getElementById('cd-s1');
+  const s2 = document.getElementById('cd-s2');
+  const heading = document.getElementById('countdown-heading');
+
+  function updateTimer() {
+    const now = new Date().getTime();
+    const diff = Math.max(0, Math.floor((expiry - now) / 1000));
+
+    if (diff <= 0) {
+      m1.textContent = '0';
+      m2.textContent = '0';
+      s1.textContent = '0';
+      s2.textContent = '0';
+      box.classList.add('countdown-urgent');
+      heading.textContent = 'RESERVATION EXPIRED — TICKETS RELEASED';
+      return;
+    }
+
+    if (diff < 120) {
+      box.classList.add('countdown-urgent');
+      heading.textContent = 'URGENT HOLD: UNDER 2 MINUTES LEFT';
+    }
+
+    const minutes = Math.floor(diff / 60);
+    const seconds = diff % 60;
+
+    const mStr = String(minutes).padStart(2, '0');
+    const sStr = String(seconds).padStart(2, '0');
+
+    m1.textContent = mStr[0];
+    m2.textContent = mStr[1];
+    s1.textContent = sStr[0];
+    s2.textContent = sStr[1];
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+})();
+</script>
+{% endblock %}

@@ -23,12 +23,23 @@ class BulkImportForm(forms.Form):
 
 
 class VenueForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        label="Venue Picture",
+        help_text="Upload a high-quality photo of the venue (JPEG, PNG, WebP).",
+    )
+
     class Meta:
         model = Venue
-        fields = ("name", "address", "max_capacity")
+        fields = ("name", "address", "max_capacity", "image")
 
 
 class EventForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        label="Event Cover Poster",
+        help_text="Upload an editorial promotional poster or banner for this event.",
+    )
     date = forms.DateTimeField(
         widget=forms.DateTimeInput(
             attrs={"type": "datetime-local"},
@@ -43,6 +54,7 @@ class EventForm(forms.ModelForm):
             "venue",
             "name",
             "description",
+            "image",
             "date",
             "allocated_capacity",
             "status",

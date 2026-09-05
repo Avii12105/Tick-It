@@ -4,30 +4,29 @@
 
 {% block content %}
   <nav class="breadcrumb">
-    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <a href="{{ url('events:organizer_event_list') }}">MY EVENTS</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
     <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}">{{ ticket_type.event.name }}</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
-    <span class="breadcrumb__current">Delete tier</span>
+    <span class="breadcrumb__current">DELETE TIER</span>
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">{{ ticket_type.event.name }}</p>
-    <h1 class="page-header__title">Delete Ticket Tier</h1>
+    <p class="page-header__eyebrow">DESTRUCTIVE ACTION // {{ ticket_type.event.name }}</p>
+    <h1 class="page-header__title">DELETE TICKET TIER</h1>
   </div>
 
   <div class="danger-panel">
     <p>
-      You are about to permanently delete the
-      <strong style="color:var(--text-1);">{{ ticket_type.name }}</strong> tier
-      from <strong style="color:var(--text-1);">{{ ticket_type.event.name }}</strong>.
-      Any active reservations for this tier will be affected. This cannot be undone.
+      You are about to permanently delete the <strong>{{ ticket_type.name }}</strong> tier
+      from <strong>{{ ticket_type.event.name }}</strong>.
+      Any uncompleted reservations for this tier will be invalidated. This action cannot be undone.
     </p>
     <form method="post">
       {{ csrf_input }}
       <div class="form-actions">
-        <button type="submit" class="btn btn-danger">Delete tier</button>
-        <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">CONFIRM TIER DELETION</button>
+        <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">CANCEL</a>
       </div>
     </form>
   </div>

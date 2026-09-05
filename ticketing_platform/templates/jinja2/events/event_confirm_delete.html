@@ -4,29 +4,29 @@
 
 {% block content %}
   <nav class="breadcrumb">
-    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <a href="{{ url('events:organizer_event_list') }}">MY EVENTS</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
     <a href="{{ url('events:organizer_event_detail', event.pk) }}">{{ event.name }}</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
-    <span class="breadcrumb__current">Delete</span>
+    <span class="breadcrumb__current">DELETE</span>
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">Back office</p>
-    <h1 class="page-header__title">Delete Event</h1>
+    <p class="page-header__eyebrow">DESTRUCTIVE ACTION // BACK OFFICE</p>
+    <h1 class="page-header__title">DELETE EVENT</h1>
   </div>
 
   <div class="danger-panel">
     <p>
-      You are about to permanently delete <strong style="color:var(--text-1);">{{ event.name }}</strong>
+      You are about to permanently delete <strong>{{ event.name }}</strong>
       scheduled for {{ event.date.strftime('%b %d, %Y') }} at {{ event.venue.name }}.
-      All ticket tiers will be removed. This cannot be undone.
+      All associated ticket tiers will be removed. This action cannot be undone.
     </p>
     <form method="post">
       {{ csrf_input }}
       <div class="form-actions">
-        <button type="submit" class="btn btn-danger">Delete event</button>
-        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">CONFIRM PERMANENT DELETION</button>
+        <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">CANCEL</a>
       </div>
     </form>
   </div>

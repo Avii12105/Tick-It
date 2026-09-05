@@ -1,27 +1,31 @@
 {% extends "base/layout.html" %}
 
-{% block title %}My Tickets · TickIt{% endblock %}
+{% block title %}My Tickets Wallet · TickIt{% endblock %}
 
 {% block content %}
-  <div class="page-header">
-    <p class="page-header__eyebrow">Wallet</p>
-    <h1 class="page-header__title">My Tickets</h1>
+  <div class="page-header-row">
+    <div class="page-header" style="margin-bottom:0;">
+      <p class="page-header__eyebrow">YOUR DIGITAL PASSBOOK</p>
+      <h1 class="page-header__title">MY TICKETS</h1>
+    </div>
     {% if tickets %}
-      <p class="page-header__sub">{{ tickets | length }} ticket{{ 's' if tickets | length != 1 else '' }}</p>
+      <span class="sticker sticker--rotate-right">{{ tickets | length }} PASS{{ 'ES' if tickets | length != 1 else '' }} ACTIVE</span>
     {% endif %}
   </div>
 
   {% if tickets %}
-    <div class="ticket-cards">
+    <div class="ticket-cards mt-4">
       {% for t in tickets %}
-        <a href="{{ url('tickets:ticket_detail', t.pk) }}" class="tkt-card" id="ticket-card-{{ t.pk }}" data-ticket-id="{{ t.pk }}" data-checked-in="{{ 'true' if t.checked_in_at or t.status == 'checked_in' else 'false' }}" aria-label="Ticket for {{ t.event.name }}">
-          <div class="tkt-card__divider" aria-hidden="true"></div>
+        <a href="{{ url('tickets:ticket_detail', t.pk) }}" class="tkt-card" id="ticket-card-{{ t.pk }}" data-ticket-id="{{ t.pk }}" data-checked-in="{{ 'true' if t.checked_in_at or t.status == 'checked_in' else 'false' }}" aria-label="Pass for {{ t.event.name }}">
           <div class="tkt-card__info">
             <p class="tkt-card__tier">{{ t.ticket_type.name }}</p>
-            <p class="tkt-card__event">{{ t.event.name }}</p>
-            <p class="tkt-card__date">{{ t.event.date.strftime('%b %d, %Y · %I:%M %p') }}</p>
-            <p class="tkt-card__date">{{ t.event.venue.name }}</p>
-            <div style="margin-top:6px;">
+            <h3 class="tkt-card__event">{{ t.event.name }}</h3>
+            <p class="tkt-card__date">
+              📅 {{ t.event.date.strftime('%b %d, %Y · %I:%M %p') }}
+              <br>
+              📍 {{ t.event.venue.name }}
+            </p>
+            <div style="margin-top:var(--space-2);">
               {% if t.checked_in_at or t.status == 'checked_in' %}
                 <span class="badge badge-checked_in ticket-badge" id="ticket-badge-{{ t.pk }}">Checked in</span>
               {% else %}
@@ -30,9 +34,11 @@
             </div>
           </div>
           <div class="tkt-card__stub">
-            <span class="tkt-card__month">{{ t.event.date.strftime('%b') }}</span>
+            <span class="tkt-card__month">{{ t.event.date.strftime('%b').upper() }}</span>
             <span class="tkt-card__day">{{ t.event.date.strftime('%d') }}</span>
-            <span style="font-family:var(--font-mono);font-size:.55rem;color:var(--text-3);margin-top:4px;word-break:break-all;">{{ t.unique_code[:6] }}…</span>
+            <span class="mono" style="font-size:0.6rem;color:var(--ink-muted);margin-top:4px;">
+              {{ t.unique_code[:6] }}…
+            </span>
           </div>
         </a>
       {% endfor %}
@@ -40,9 +46,9 @@
   {% else %}
     <div class="empty-state">
       <div class="empty-state__icon">🎟</div>
-      <p class="empty-state__title">No tickets yet</p>
-      <p class="empty-state__text">Browse events and reserve your first ticket.</p>
-      <a href="{{ url('events:home') }}" class="btn btn-primary">Browse events</a>
+      <h2 class="empty-state__title">NO TICKETS IN YOUR WALLET.</h2>
+      <p class="empty-state__text">Browse upcoming events and reserve your passes.</p>
+      <a href="{{ url('events:home') }}" class="btn btn-primary">DISCOVER EVENTS →</a>
     </div>
   {% endif %}
 {% endblock %}
@@ -87,10 +93,7 @@
   // Polling server for updates if there are any unchecked tickets
   async function pollTickets() {
     const remaining = document.querySelectorAll('.tkt-card[data-checked-in="false"]');
-    if (!remaining.length) {
-      if (pollTimer) clearInterval(pollTimer);
-      return;
-    }
+    if (!remaining.length) return;
     try {
       const response = await fetch('{{ url("tickets:my_tickets_status") }}', {
         headers: { 'Accept': 'application/json' }
@@ -99,7 +102,7 @@
         const data = await response.json();
         if (data && data.tickets) {
           data.tickets.forEach(function(t) {
-            if (t.is_checked_in || t.status === 'checked_in') {
+            if (t.checked_in) {
               markCardCheckedIn(t.id);
             }
           });
@@ -108,11 +111,7 @@
     } catch (err) {}
   }
 
-  const unchecked = document.querySelectorAll('.tkt-card[data-checked-in="false"]');
-  let pollTimer = null;
-  if (unchecked.length > 0) {
-    pollTimer = setInterval(pollTickets, 3000);
-  }
+  setInterval(pollTickets, 3000);
 })();
 </script>
 {% endblock %}

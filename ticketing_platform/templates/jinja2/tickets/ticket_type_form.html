@@ -1,10 +1,10 @@
 {% extends "base/layout.html" %}
 
-{% block title %}{{ title }} · TickIt{% endblock %}
+{% block title %}{{ title }} · TickIt Tier Configuration{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
-    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <a href="{{ url('events:organizer_event_list') }}">MY EVENTS</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
     <a href="{{ url('events:organizer_event_detail', event.pk) }}">{{ event.name }}</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
@@ -12,48 +12,53 @@
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">{{ event.name }}</p>
+    <p class="page-header__eyebrow">TIER QUOTA &amp; PRICING // {{ event.name }}</p>
     <h1 class="page-header__title">{{ title }}</h1>
   </div>
 
   {%- set remaining = event.allocated_capacity - used_capacity -%}
-  <div class="stat-row" style="max-width:520px;margin-bottom:1.5rem;">
-    <div class="stat-card stat-card--violet">
-      <p class="stat-card__label">Event capacity</p>
+  <div class="stat-row mb-4" style="max-width:540px;">
+    <div class="stat-card stat-card--orange">
+      <p class="stat-card__label">EVENT ALLOCATION</p>
       <p class="stat-card__value">{{ event.allocated_capacity }}</p>
+      <p class="stat-card__sub">TOTAL EVENT SEATS</p>
     </div>
     <div class="stat-card">
-      <p class="stat-card__label">Allocated</p>
+      <p class="stat-card__label">CURRENTLY ALLOCATED</p>
       <p class="stat-card__value">{{ used_capacity }}</p>
+      <p class="stat-card__sub">ACROSS OTHER TIERS</p>
     </div>
-    <div class="stat-card{% if remaining == 0 %} stat-card--red{% else %} stat-card--sage{% endif %}">
-      <p class="stat-card__label">Remaining</p>
+    <div class="stat-card{% if remaining == 0 %} stat-card--red{% else %} stat-card--green{% endif %}">
+      <p class="stat-card__label">UNALLOCATED BALANCE</p>
       <p class="stat-card__value">{{ remaining }}</p>
+      <p class="stat-card__sub">AVAILABLE FOR THIS TIER</p>
     </div>
   </div>
 
   <div class="form-shell">
     <div class="form-wrap">
       {% if form.non_field_errors() %}
-        <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+        <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+          {{ form.non_field_errors() }}
+        </div>
       {% endif %}
       <form method="post">
         {{ csrf_input }}
         {{ form.as_p() }}
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save tier</button>
-          <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">SAVE TIER SPECIFICATION →</button>
+          <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-ghost">CANCEL</a>
         </div>
       </form>
     </div>
 
     <aside class="form-hint">
-      <p class="form-hint__title">Tips</p>
-      <ul style="padding:0;margin:0;">
-        <li>Quantity total across all tiers cannot exceed the event's allocated capacity.</li>
-        <li>You cannot shrink a tier below what's already sold or reserved.</li>
-        <li>Use tier names like <em>General</em>, <em>VIP</em>, or <em>Early Bird</em>.</li>
-        <li>Price is in ₹ — set 0 for free tiers.</li>
+      <h3 class="form-hint__title">QUOTA RULES</h3>
+      <ul>
+        <li>Cumulative tier quantities must not exceed the event's total allocation ({{ event.allocated_capacity }}).</li>
+        <li>Tiers cannot be reduced below tickets already sold or reserved.</li>
+        <li>Name convention: <em>General Admission</em>, <em>VIP Pass</em>, <em>Early Bird</em>.</li>
+        <li>Price is denominated in INR (₹) — enter 0 for complimentary entry.</li>
       </ul>
     </aside>
   </div>

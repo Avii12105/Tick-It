@@ -54,6 +54,7 @@ class Venue(models.Model):
         on_delete=models.CASCADE,
         related_name="venues",
     )
+    image = models.ImageField(upload_to="venues/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -100,6 +101,7 @@ class Event(models.Model):
     )
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    image = models.ImageField(upload_to="events/", blank=True, null=True)
     date = models.DateTimeField()
     allocated_capacity = models.PositiveIntegerField(
         help_text="Total number of tickets this event will sell.",

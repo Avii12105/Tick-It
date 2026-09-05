@@ -16,7 +16,7 @@
     <p class="auth-sub">Join as an attendee or organizer — you pick at signup.</p>
 
     {% if form.non_field_errors() %}
-      <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+      <div class="alert alert-error" style="margin-bottom:1rem;">
         {{ form.non_field_errors() }}
       </div>
     {% endif %}
@@ -35,3 +35,4 @@
   </div>
 </div>
 {% endblock %}
+

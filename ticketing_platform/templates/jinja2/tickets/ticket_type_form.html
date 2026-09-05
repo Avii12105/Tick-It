@@ -39,7 +39,7 @@
     {# ── Form ─────────────────────────────────────────────── #}
     <div class="form-wrap">
       {% if form.non_field_errors() %}
-        <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+        <div class="alert alert-error" style="margin-bottom:1rem;">
           {{ form.non_field_errors() }}
         </div>
       {% endif %}
@@ -165,3 +165,4 @@ function update() {
 update();
 </script>
 {% endblock %}
+

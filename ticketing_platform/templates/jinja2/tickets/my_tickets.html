@@ -2,16 +2,18 @@
 {% block title %}My Tickets · TickIt{% endblock %}
 
 {% block content %}
-  <div class="page-header">
-    <p class="page-header__eyebrow">Wallet</p>
-    <h1 class="page-header__title">My Tickets</h1>
+  <div class="page-header-row">
+    <div class="page-header" style="margin-bottom:0;">
+      <p class="page-header__eyebrow">YOUR DIGITAL PASSBOOK</p>
+      <h1 class="page-header__title">MY TICKETS</h1>
+    </div>
     {% if tickets %}
       <p class="page-header__sub">{{ tickets | length }} ticket{{ 's' if tickets | length != 1 }}</p>
     {% endif %}
   </div>
 
   {% if tickets %}
-    <div class="ticket-cards">
+    <div class="ticket-cards mt-4">
       {% for t in tickets %}
         <a href="{{ url('tickets:ticket_detail', t.pk) }}"
            class="tkt-card"

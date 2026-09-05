@@ -11,8 +11,8 @@
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">{{ ticket_type.event.name }}</p>
-    <h1 class="page-header__title">Delete Ticket Tier</h1>
+    <p class="page-header__eyebrow">DESTRUCTIVE ACTION // {{ ticket_type.event.name }}</p>
+    <h1 class="page-header__title">DELETE TICKET TIER</h1>
   </div>
 
   <div class="danger-panel">
@@ -25,8 +25,8 @@
     <form method="post">
       {{ csrf_input }}
       <div class="form-actions">
-        <button type="submit" class="btn btn-danger">Delete tier</button>
-        <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger">CONFIRM TIER DELETION</button>
+        <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">CANCEL</a>
       </div>
     </form>
   </div>

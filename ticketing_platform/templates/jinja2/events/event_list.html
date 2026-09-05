@@ -2,6 +2,39 @@
 {% block title %}Events · TickIt{% endblock %}
 
 {% block content %}
+  <!-- Editorial Poster Hero (§29) -->
+  <section class="editorial-hero" id="hero-snow-host">
+    <!-- PixelSnow WebGL canvas is injected here by JS -->
+    <div class="hero-tag-row" style="position:relative;z-index:1;">
+      <span class="sticker sticker--live sticker--rotate-left">✦ LIVE PLATFORM</span>
+      <span class="sticker sticker--neon">ALL-ACCESS PASS</span>
+    </div>
+    <h1 class="hero-title" style="position:relative;z-index:1;">
+      DISCOVER <br>
+      <span class="text-orange">WHAT'S NEXT.</span>
+    </h1>
+    <p class="hero-subtitle">
+      Direct ticketing, physical-digital entry passes, and cryptographic QR check-in. Curated concerts, underground gigs, tech summits, and cultural exhibitions.
+    </p>
+    <div class="hero-meta-strip" style="position:relative;z-index:1;">
+      <span>✦ ISSUE NO. 26</span>
+      <span>REAL-TIME QR ADMISSION</span>
+      <span>10-MIN CART RESERVATION</span>
+      <span>VERIFIED CAPACITY</span>
+    </div>
+  </section>
+
+  <!-- Category Filter Chips (§41) -->
+  <div class="category-chips" id="category-chips">
+    <button type="button" class="chip-btn cursor-target active" data-cat="all">ALL EVENTS</button>
+    <button type="button" class="chip-btn cursor-target" data-cat="music">MUSIC &amp; LIVE</button>
+    <button type="button" class="chip-btn cursor-target" data-cat="tech">TECH &amp; CREATIVE</button>
+    <button type="button" class="chip-btn cursor-target" data-cat="culture">CULTURE &amp; ART</button>
+    <button type="button" class="chip-btn cursor-target" data-cat="comedy">COMEDY &amp; TALKS</button>
+    <button type="button" class="chip-btn cursor-target" data-cat="workshops">WORKSHOPS</button>
+  </div>
+
+  <!-- Page Header & Filter Row -->
   <div class="page-header-row">
     <div class="page-header">
       <p class="page-header__eyebrow">Upcoming</p>
@@ -18,15 +51,16 @@
   </div>
 
   {% if events %}
-    <div class="filter-bar">
+    <div class="filter-bar mt-4">
       <div class="filter-input-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
         <input class="filter-input" type="search" id="event-search" placeholder="Search events…" autocomplete="off">
       </div>
     </div>
 
+    <!-- Editorial Event Cards Grid (§23) -->
     <div class="events-grid" id="events-grid">
       {%- for event in events -%}
         {%- set ns = namespace(min_price=None, avail=0) -%}
@@ -35,8 +69,11 @@
           {%- set ns.avail = ns.avail + a -%}
           {%- if ns.min_price is none or tt.price < ns.min_price -%}{%- set ns.min_price = tt.price -%}{%- endif -%}
         {%- endfor -%}
-        <a href="{{ url('events:public_event_detail', event.pk) }}" class="event-card-pub" data-name="{{ event.name | lower }}">
-          <div class="event-card-pub__banner">
+
+        <article class="event-card-pub" data-name="{{ event.name | lower }} {{ event.venue.name | lower }}">
+          <div class="event-card-pub__banner"{% if event.image %} style="background-image:url('{{ event.image.url }}');"{% elif event.venue.image %} style="background-image:url('{{ event.venue.image.url }}');"{% endif %}>
+            <div class="event-card-pub__pattern-bg"{% if event.image or event.venue.image %} style="background:linear-gradient(180deg, rgba(21, 19, 19, 0.35) 0%, rgba(21, 19, 19, 0.88) 100%);"{% endif %}></div>
+
             <div class="event-card-pub__date">
               <strong>{{ event.date.strftime('%d') }}</strong>
               <span>{{ event.date.strftime('%b') }}</span>
@@ -71,9 +108,30 @@
     <script>
       const inp   = document.getElementById('event-search');
       const cards = document.querySelectorAll('#events-grid .event-card-pub');
-      inp.addEventListener('input', () => {
-        const q = inp.value.toLowerCase();
-        cards.forEach(c => { c.style.display = c.dataset.name.includes(q) ? '' : 'none'; });
+      if (inp) {
+        inp.addEventListener('input', () => {
+          const q = inp.value.toLowerCase().trim();
+          cards.forEach(c => {
+            c.style.display = c.dataset.name.includes(q) ? '' : 'none';
+          });
+        });
+      }
+
+      // Filter chips interaction
+      const chips = document.querySelectorAll('#category-chips .chip-btn');
+      chips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          chips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          const cat = chip.dataset.cat;
+          if (cat === 'all') {
+            cards.forEach(c => c.style.display = '');
+          } else {
+            cards.forEach(c => {
+              c.style.display = c.dataset.name.includes(cat) ? '' : 'none';
+            });
+          }
+        });
       });
     </script>
 
@@ -87,4 +145,28 @@
       {% endif %}
     </div>
   {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module">
+  import { mountPixelSnow } from '{{ static("js/pixel_snow.js") }}';
+
+  const hero = document.getElementById('hero-snow-host');
+  if (hero) {
+    mountPixelSnow(hero, {
+      color: '#F7AA28',      // warm amber — matches --orange brand token
+      flakeSize: 0.008,
+      minFlakeSize: 1.1,
+      pixelResolution: 180, // slightly blocky retro look
+      speed: 0.9,
+      density: 0.55,
+      depthFade: 7,
+      farPlane: 22,
+      brightness: 0.85,
+      gamma: 0.4545,
+      variant: 'square',
+      direction: 130,
+    }).catch(err => console.warn('[PixelSnow] WebGL unavailable:', err));
+  }
+</script>
 {% endblock %}

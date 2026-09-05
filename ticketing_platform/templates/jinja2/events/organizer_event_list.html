@@ -23,14 +23,17 @@
       <div class="stat-card stat-card--accent">
         <p class="stat-card__label">Total</p>
         <p class="stat-card__value">{{ ns.total }}</p>
+        <p class="stat-card__sub">UNDER MANAGEMENT</p>
       </div>
       <div class="stat-card stat-card--green">
-        <p class="stat-card__label">Published</p>
+        <p class="stat-card__label">PUBLISHED &amp; LIVE</p>
         <p class="stat-card__value">{{ ns.pub }}</p>
+        <p class="stat-card__sub">ACCEPTING ORDERS</p>
       </div>
       <div class="stat-card stat-card--amber">
-        <p class="stat-card__label">Draft</p>
+        <p class="stat-card__label">IN DRAFT</p>
         <p class="stat-card__value">{{ ns.draft }}</p>
+        <p class="stat-card__sub">PENDING SETUP</p>
       </div>
       <div class="stat-card stat-card--red">
         <p class="stat-card__label">Cancelled</p>
@@ -48,7 +51,12 @@
               <p class="event-card__meta">{{ event.date.strftime('%b %-d, %Y · %-I:%M %p') }}</p>
               <p class="event-card__meta">{{ event.venue.name }}</p>
             </div>
-            <span class="badge badge-{{ event.status }}">{{ event.get_status_display() }}</span>
+            <div style="text-align:right;">
+              <span class="mono" style="font-size:0.75rem;font-weight:700;color:var(--ink-muted);display:block;">ALLOCATION</span>
+              <span class="mono" style="font-size:1.1rem;font-weight:800;color:var(--ink);">
+                {{ event.allocated_capacity }} / {{ event.venue.max_capacity }}
+              </span>
+            </div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:4px;">

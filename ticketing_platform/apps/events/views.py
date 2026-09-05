@@ -67,7 +67,7 @@ def venue_list(request):
 def venue_create(request):
     """Create a new venue. Owner is set server-side — never trusted from POST."""
     if request.method == "POST":
-        form = VenueForm(request.POST)
+        form = VenueForm(request.POST, request.FILES)
         if form.is_valid():
             venue       = form.save(commit=False)
             venue.owner = request.user  # Force ownership — ignore any crafted input
@@ -92,7 +92,7 @@ def venue_update(request, pk):
     """Edit a venue. 404 if not the owner."""
     venue = get_object_or_404(Venue, pk=pk, owner=request.user)
     if request.method == "POST":
-        form = VenueForm(request.POST, instance=venue)
+        form = VenueForm(request.POST, request.FILES, instance=venue)
         if form.is_valid():
             form.save()
             messages.success(request, f"Venue '{venue.name}' updated.")
@@ -152,7 +152,7 @@ def organizer_event_detail(request, pk):
 def event_create(request):
     """Create a new event. Organizer is set server-side."""
     if request.method == "POST":
-        form = EventForm(request.POST, organizer=request.user)
+        form = EventForm(request.POST, request.FILES, organizer=request.user)
         if form.is_valid():
             event            = form.save(commit=False)
             event.organizer  = request.user
@@ -169,7 +169,7 @@ def event_update(request, pk):
     """Edit an event. 404 if not the organizer."""
     event = get_object_or_404(Event, pk=pk, organizer=request.user)
     if request.method == "POST":
-        form = EventForm(request.POST, instance=event, organizer=request.user)
+        form = EventForm(request.POST, request.FILES, instance=event, organizer=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, f"Event '{event.name}' updated.")

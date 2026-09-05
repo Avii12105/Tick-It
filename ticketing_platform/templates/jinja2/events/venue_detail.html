@@ -9,14 +9,14 @@
   </nav>
 
   <div class="page-header-row">
-    <div class="page-header">
-      <p class="page-header__eyebrow">Venue</p>
+    <div class="page-header" style="margin-bottom:0;">
+      <p class="page-header__eyebrow">VENUE PROFILE // PHYSICAL CAPACITY</p>
       <h1 class="page-header__title">{{ venue.name }}</h1>
-      {% if venue.address %}<p class="page-header__sub">{{ venue.address }}</p>{% endif %}
+      {% if venue.address %}<p class="page-header__sub">📍 {{ venue.address }}</p>{% endif %}
     </div>
-    <div style="display:flex;gap:.5rem;">
-      <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">Edit</a>
-      <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+    <div style="display:flex;gap:var(--space-2);">
+      <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">EDIT VENUE</a>
+      <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">DELETE</a>
     </div>
   </div>
 
@@ -24,10 +24,12 @@
     <div class="stat-card stat-card--accent">
       <p class="stat-card__label">Max capacity</p>
       <p class="stat-card__value">{{ venue.max_capacity }}</p>
+      <p class="stat-card__sub">PER EVENT HARD LIMIT</p>
     </div>
     <div class="stat-card">
-      <p class="stat-card__label">Events hosted</p>
+      <p class="stat-card__label">EVENTS HOSTED</p>
       <p class="stat-card__value">{{ events | length }}</p>
+      <p class="stat-card__sub">HISTORICAL &amp; UPCOMING</p>
     </div>
   </div>
 
@@ -56,8 +58,9 @@
       </table>
     </div>
   {% else %}
-    <div class="empty-state" style="padding:2rem 0;">
-      <p class="empty-state__text">No events at this venue yet.</p>
+    <div class="empty-state">
+      <p class="empty-state__text">No events currently scheduled at this venue.</p>
+      <a href="{{ url('events:event_create') }}" class="btn btn-primary btn-sm">+ CREATE EVENT AT THIS VENUE</a>
     </div>
   {% endif %}
 {% endblock %}

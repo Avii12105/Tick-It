@@ -11,7 +11,7 @@
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">{{ event.name }}</p>
+    <p class="page-header__eyebrow">TIER QUOTA &amp; PRICING // {{ event.name }}</p>
     <h1 class="page-header__title">{{ title }}</h1>
   </div>
 
@@ -20,14 +20,17 @@
     <div class="stat-card stat-card--accent">
       <p class="stat-card__label">Event cap</p>
       <p class="stat-card__value">{{ event.allocated_capacity }}</p>
+      <p class="stat-card__sub">TOTAL EVENT SEATS</p>
     </div>
     <div class="stat-card">
-      <p class="stat-card__label">Allocated</p>
+      <p class="stat-card__label">CURRENTLY ALLOCATED</p>
       <p class="stat-card__value">{{ used_capacity }}</p>
+      <p class="stat-card__sub">ACROSS OTHER TIERS</p>
     </div>
     <div class="stat-card{% if remaining == 0 %} stat-card--red{% else %} stat-card--green{% endif %}">
       <p class="stat-card__label">Remaining</p>
       <p class="stat-card__value">{{ remaining }}</p>
+      <p class="stat-card__sub">AVAILABLE FOR THIS TIER</p>
     </div>
   </div>
 
@@ -36,7 +39,9 @@
     {# ── Form ─────────────────────────────────────────────── #}
     <div class="form-wrap">
       {% if form.non_field_errors() %}
-        <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+        <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+          {{ form.non_field_errors() }}
+        </div>
       {% endif %}
       <form method="post" id="tier-form">
         {{ csrf_input }}
@@ -79,8 +84,8 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save tier</button>
-          <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">SAVE TIER SPECIFICATION →</button>
+          <a href="{{ url('events:organizer_event_detail', event.pk) }}" class="btn btn-ghost">CANCEL</a>
         </div>
       </form>
     </div>

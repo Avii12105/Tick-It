@@ -4,7 +4,8 @@
 
 {% block content %}
 <div class="auth-shell">
-  <div class="auth-card">
+  <div class="auth-card cursor-target" data-card-label="TICKIT // AUTH PORTAL" style="max-width:480px;">
+    <div class="shadow__auth-card"></div>
     <div class="auth-logo">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M2 9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v1.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1.5a2.5 2.5 0 0 0 0-5V9Z" stroke="var(--accent)" stroke-width="1.75" stroke-linejoin="round"/>
@@ -16,11 +17,13 @@
     <p class="auth-sub">Log in to access your tickets and events.</p>
 
     {% if form.non_field_errors() %}
-      <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+      <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+        {{ form.non_field_errors() }}
+      </div>
     {% endif %}
 
-    <form method="post">
-      {{ csrf_input }}
+    <form method="post" class="auth-form-3d">
+      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
       <input type="hidden" name="next" value="{{ next or '' }}">
       {{ form.as_p() }}
       <div class="form-actions" style="margin-top:1.25rem;">
@@ -29,7 +32,7 @@
     </form>
 
     <div class="auth-footer">
-      Don't have an account? <a href="{{ url('accounts:signup') }}">Sign up free</a>
+      New to TickIt? <a href="{{ url('accounts:signup') }}" class="cursor-target">Create your account free</a>
     </div>
   </div>
 </div>

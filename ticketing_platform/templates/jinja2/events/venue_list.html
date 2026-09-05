@@ -11,7 +11,7 @@
   </div>
 
   {% if venues %}
-    <div class="venue-cards">
+    <div class="venue-cards mt-4">
       {% for venue in venues %}
         <div class="venue-card">
           <p class="venue-card__name">{{ venue.name }}</p>
@@ -19,13 +19,13 @@
             {% if venue.address %}{{ venue.address }}{% else %}<span style="color:var(--t4);">No address set</span>{% endif %}
           </p>
           <div class="venue-card__cap">
-            <span class="venue-card__cap-label">Max capacity</span>
+            <span class="venue-card__cap-label">MAXIMUM CAPACITY</span>
             <span class="venue-card__cap-value">{{ venue.max_capacity }}</span>
           </div>
           <div class="venue-card__actions">
-            <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-secondary btn-sm">View</a>
-            <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">Edit</a>
-            <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">Delete</a>
+            <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-primary btn-sm">VIEW VENUE →</a>
+            <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">EDIT</a>
+            <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">DELETE</a>
           </div>
         </div>
       {% endfor %}

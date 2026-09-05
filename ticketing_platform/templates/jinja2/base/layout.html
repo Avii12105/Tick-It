@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}TickIt{% endblock %}</title>
+  <title>{% block title %}TickIt — Street-Editorial Event Platform{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
   <link rel="stylesheet" href="{{ static('css/styles.css') }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="page-body">
+<body class="page-body paper-texture">
   {% include "base/nav.html" %}
   <main class="site-main">
     {% block full_width %}{% endblock %}
@@ -18,17 +18,40 @@
       {% if messages %}
         <div class="alerts">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }}">
+              <span class="alert-symbol">
+                {% if message.tags == 'error' or message.tags == 'danger' %}✕
+                {% elif message.tags == 'warning' %}⚠
+                {% elif message.tags == 'success' %}✓
+                {% else %}✦{% endif %}
+              </span>
+              <span class="alert-content">{{ message }}</span>
+            </div>
           {% endfor %}
         </div>
       {% endif %}
       {% block content %}{% endblock %}
     </div>
   </main>
+
   <footer class="site-footer">
     <span>© 2026 TickIt</span>
     <span>Built with Django</span>
   </footer>
+
+  <!-- TargetCursor / Street-Editorial Dynamic Targeting Cursor -->
+  <script type="module">
+    import { mountTargetCursor } from '{{ static("js/TargetCursor.js") }}';
+    mountTargetCursor({
+      targetSelector: '.cursor-target, .btn, .chip-btn, .event-card-pub, .ticket-card, a, button, input[type="submit"], input[type="search"]',
+      spinDuration: 2,
+      hideDefaultCursor: true,
+      parallaxOn: true,
+      cursorColor: '#ffffff',
+      cursorColorOnTarget: '#F7AA28'
+    }).catch(err => console.warn('[TargetCursor] Mount error:', err));
+  </script>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

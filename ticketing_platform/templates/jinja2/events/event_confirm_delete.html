@@ -23,7 +23,7 @@
       All associated ticket tiers will be removed. This action cannot be undone.
     </p>
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       <div class="form-actions">
         <button type="submit" class="btn btn-danger">CONFIRM PERMANENT DELETION</button>
         <a href="{{ url('events:organizer_event_list') }}" class="btn btn-secondary">CANCEL</a>
@@ -31,3 +31,4 @@
     </form>
   </div>
 {% endblock %}
+

@@ -23,7 +23,7 @@
       Any uncompleted reservations for this tier will be invalidated. This action cannot be undone.
     </p>
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       <div class="form-actions">
         <button type="submit" class="btn btn-danger">CONFIRM TIER DELETION</button>
         <a href="{{ url('events:organizer_event_detail', ticket_type.event_id) }}" class="btn btn-secondary">CANCEL</a>
@@ -31,3 +31,4 @@
     </form>
   </div>
 {% endblock %}
+

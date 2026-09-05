@@ -22,7 +22,7 @@
       This action will be rejected if any scheduled events are currently linked to this venue.
     </p>
     <form method="post">
-      <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+      {{ csrf_input }}
       <div class="form-actions">
         <button type="submit" class="btn btn-danger">CONFIRM VENUE DELETION</button>
         <a href="{{ url('events:venue_detail', venue.pk) }}" class="btn btn-secondary">CANCEL</a>
@@ -30,3 +30,4 @@
     </form>
   </div>
 {% endblock %}
+

@@ -84,7 +84,8 @@ class Venue(models.Model):
         on_delete=models.CASCADE,
         related_name="venues",
     )
-    created_at   = models.DateTimeField(auto_now_add=True)
+    image      = models.ImageField(upload_to="venues/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -183,6 +184,8 @@ class Event(models.Model):
     cover_color   = models.CharField(max_length=7, blank=True, default="", help_text="Banner accent colour as hex, e.g. #5B4CF5")
     # External image URL for the event banner/cover
     cover_image   = models.URLField(blank=True, help_text="URL of a banner/cover image for the event.")
+    # Upload-based image (V4+ organizer canvas)
+    image         = models.ImageField(upload_to="events/", blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

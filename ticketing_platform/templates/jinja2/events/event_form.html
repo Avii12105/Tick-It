@@ -1,41 +1,50 @@
 {% extends "base/layout.html" %}
 
-{% block title %}{{ title }} · TickIt{% endblock %}
+{% block title %}{{ title }} · TickIt Back Office{% endblock %}
 
 {% block content %}
   <nav class="breadcrumb">
-    <a href="{{ url('events:organizer_event_list') }}">My Events</a>
+    <a href="{{ url('events:organizer_event_list') }}">MY EVENTS</a>
     <span class="breadcrumb__sep" aria-hidden="true">›</span>
     <span class="breadcrumb__current">{{ title }}</span>
   </nav>
 
   <div class="page-header">
-    <p class="page-header__eyebrow">Back office</p>
+    <p class="page-header__eyebrow">EVENT CONFIGURATION // BACK OFFICE</p>
     <h1 class="page-header__title">{{ title }}</h1>
   </div>
 
   <div class="form-shell">
     <div class="form-wrap">
       {% if form.non_field_errors() %}
-        <div class="alert alert-error" style="margin-bottom:1.25rem;">{{ form.non_field_errors() }}</div>
+        <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+          {{ form.non_field_errors() }}
+        </div>
       {% endif %}
-      <form method="post">
+      <form method="post" enctype="multipart/form-data">
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {% if form.instance.pk and form.instance.image %}
+          <div class="mb-4" style="border:2px solid var(--ink);padding:var(--space-3);background:var(--paper-dark);box-shadow:var(--shadow-print-sm);">
+            <p style="font-family:var(--font-mono);font-size:0.75rem;font-weight:700;color:var(--orange-dark);margin:0 0 var(--space-2);">CURRENT EVENT POSTER</p>
+            <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" style="max-height:160px;width:auto;display:block;border:1px solid var(--ink);object-fit:cover;">
+          </div>
+        {% endif %}
         {{ form.as_p() }}
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Save event</button>
-          <a href="{{ url('events:organizer_event_list') }}" class="btn btn-ghost">Cancel</a>
+          <button type="submit" class="btn btn-primary">SAVE EVENT CONFIGURATION →</button>
+          <a href="{{ url('events:organizer_event_list') }}" class="btn btn-ghost">CANCEL</a>
         </div>
       </form>
     </div>
 
     <aside class="form-hint">
-      <p class="form-hint__title">Tips</p>
-      <ul style="padding:0;margin:0;">
-        <li>Give the event a clear, searchable name.</li>
-        <li>Allocated capacity must not exceed the venue's max capacity.</li>
-        <li>Set status to <strong style="color:var(--indigo);">Draft</strong> while you're setting up — publish when ready.</li>
-        <li>Add ticket tiers after saving the event.</li>
+      <h3 class="form-hint__title">OPERATOR NOTES</h3>
+      <ul>
+        <li>Choose an iconic, searchable event title.</li>
+        <li>Upload high-impact poster artwork (16:9 or 4:3 recommended) for public listings.</li>
+        <li>Allocated capacity cannot exceed the selected venue's physical max capacity.</li>
+        <li>Set status to <strong>Draft</strong> while configuring tiers — switch to <strong>Published</strong> to open public reservations.</li>
+        <li>Configure specific ticket tiers (pricing and quotas) after saving.</li>
       </ul>
     </aside>
   </div>

@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}TickIt{% endblock %}</title>
+  <title>{% block title %}TickIt — Street-Editorial Event Platform{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito+Sans:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=Pacifico&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap">
   <link rel="stylesheet" href="{{ static('css/styles.css') }}">
-  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <link rel="stylesheet" href="{{ static('css/TargetCursor.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23F7AA28%22/><text y=%22.9em%22 font-size=%2280%22 font-weight=%22bold%22 font-family=%22sans-serif%22 fill=%22%23151313%22>T</text></svg>">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="page-body">
+<body class="page-body paper-texture">
   {% include "base/nav.html" %}
   <main class="site-main">
     {% block full_width %}{% endblock %}
@@ -19,17 +20,55 @@
       {% if messages %}
         <div class="alerts">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }}">
+              <span class="alert-symbol">
+                {% if message.tags == 'error' or message.tags == 'danger' %}✕
+                {% elif message.tags == 'warning' %}⚠
+                {% elif message.tags == 'success' %}✓
+                {% else %}✦{% endif %}
+              </span>
+              <span class="alert-content">{{ message }}</span>
+            </div>
           {% endfor %}
         </div>
       {% endif %}
       {% block content %}{% endblock %}
     </div>
   </main>
+
   <footer class="site-footer">
-    <span>TickIt &mdash; Event Ticketing Platform</span>
-    <span>Built with Django</span>
+    <div class="footer-inner">
+      <div class="footer-colophon">
+        <div class="footer-brand">
+          <span class="footer-logo">TICKIT</span>
+          <span class="footer-tagline">STREET-EDITORIAL EVENT TICKETING &amp; QR PLATFORM</span>
+        </div>
+        <div class="footer-meta">
+          <span>VOL. 26 // ED. 04</span>
+          <span>✦ ALL ACCESS DISPATCH ✦</span>
+          <span>BUILT WITH DJANGO &amp; JINJA2</span>
+        </div>
+      </div>
+      <div class="footer-bottom-line">
+        <span>&copy; 2026 TICKIT PLATFORM. ALL RIGHTS RESERVED.</span>
+        <span>HIGH CONTRAST &bull; POSTER AESTHETIC &bull; REAL-TIME QR</span>
+      </div>
+    </div>
   </footer>
+
+  <!-- TargetCursor / Street-Editorial Dynamic Targeting Cursor -->
+  <script type="module">
+    import { mountTargetCursor } from '{{ static("js/TargetCursor.js") }}';
+    mountTargetCursor({
+      targetSelector: '.cursor-target, .btn, .chip-btn, .event-card-pub, .ticket-card, a, button, input[type="submit"], input[type="search"]',
+      spinDuration: 2,
+      hideDefaultCursor: true,
+      parallaxOn: true,
+      cursorColor: '#ffffff',
+      cursorColorOnTarget: '#F7AA28'
+    }).catch(err => console.warn('[TargetCursor] Mount error:', err));
+  </script>
+
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

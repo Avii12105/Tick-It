@@ -16,16 +16,16 @@
   <div class="form-shell">
     <div class="form-wrap">
       {% if form.non_field_errors() %}
-        <div class="alert alert-error" style="margin-bottom:var(--space-4);">
+        <div class="alert alert-error" style="margin-bottom:1rem;">
           {{ form.non_field_errors() }}
         </div>
       {% endif %}
       <form method="post" enctype="multipart/form-data">
-        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        {{ csrf_input }}
         {% if form.instance.pk and form.instance.image %}
-          <div class="mb-4" style="border:2px solid var(--ink);padding:var(--space-3);background:var(--paper-dark);box-shadow:var(--shadow-print-sm);">
-            <p style="font-family:var(--font-mono);font-size:0.75rem;font-weight:700;color:var(--orange-dark);margin:0 0 var(--space-2);">CURRENT VENUE PHOTO</p>
-            <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" style="max-height:160px;width:auto;display:block;border:1px solid var(--ink);object-fit:cover;">
+          <div class="mb-4" style="border:2px solid var(--t1);padding:1rem;background:var(--surface-2);box-shadow:var(--shadow-xs);">
+            <p style="font-family:var(--mono);font-size:0.75rem;font-weight:700;color:var(--accent);margin:0 0 1rem;">CURRENT VENUE PHOTO</p>
+            <img src="{{ form.instance.image.url }}" alt="{{ form.instance.name }}" style="max-height:160px;width:auto;display:block;border:1px solid var(--t1);object-fit:cover;">
           </div>
         {% endif %}
         {{ form.as_p() }}
@@ -46,3 +46,4 @@
     </aside>
   </div>
 {% endblock %}
+

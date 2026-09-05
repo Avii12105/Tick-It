@@ -14,7 +14,7 @@
       <h1 class="page-header__title">{{ venue.name }}</h1>
       {% if venue.address %}<p class="page-header__sub">📍 {{ venue.address }}</p>{% endif %}
     </div>
-    <div style="display:flex;gap:var(--space-2);">
+    <div style="display:flex;gap:1rem;">
       <a href="{{ url('events:venue_update', venue.pk) }}" class="btn btn-secondary btn-sm">EDIT VENUE</a>
       <a href="{{ url('events:venue_delete', venue.pk) }}" class="btn btn-danger btn-sm">DELETE</a>
     </div>
@@ -64,3 +64,4 @@
     </div>
   {% endif %}
 {% endblock %}
+
